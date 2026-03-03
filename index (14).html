@@ -1,0 +1,2817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- MODIFIED: Changed "Shuvidha" to "Shuvidha Seva" -->
+    <title>Shuvidha Seva</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    
+    <style>
+        :root {
+            /* --- MODIFIED: DEEP PURPLE SCHEME (Based on image hint) --- */
+            --primary-color: #673AB7; /* Deep Purple - Will be overridden by JS from Admin Settings */ 
+            --primary-gradient: linear-gradient(135deg, #7E57C2 0%, #512DA8 100%); /* Light Purple to Dark Purple - Will be overridden by JS from Admin Settings */
+            
+            --secondary-color: #f8f9fa; /* Soft Grey Background */
+            --text-color: #212529; /* Dark text */
+            --light-text: #6c757d; /* Light text */
+            --border-color: #ced4da;
+            --white: #ffffff;
+            --danger: #D84315; /* Darker Red/Orange for strong alerts/active heart (Retained for danger) */
+            --success: #00b894; /* Cyan/Teal for success (Retained for visual contrast) */
+            /* MODIFIED: Secondary accent changed to a deep pink/magenta for contrast with purple */
+            --blue-action: #E91E63; /* Deep Pink/Magenta */ 
+            --secondary-accent: #E91E63; /* Deep Pink/Magenta */ 
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #dfe6e9;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; color: var(--text-color);
+        }
+
+        .mobile-container {
+            width: 100%; max-width: 414px; height: 100vh; max-height: 896px;
+            background-color: var(--secondary-color);
+            border-radius: 0px; 
+            overflow: hidden; position: relative; display: flex; flex-direction: column;
+        }
+        
+        @media (min-width: 420px) {
+            .mobile-container {
+                border-radius: 30px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+                height: 90vh;
+                /* MODIFIED: Border matching app icon color (primary color) */
+                border: 8px solid var(--primary-color);
+            }
+        }
+
+        .page {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            background-color: var(--secondary-color);
+            display: flex; flex-direction: column; z-index: 1;
+        }
+        /* MODIFIED: Remove .page.active from default login to make appContainer the default */
+        /* .page.active { opacity: 1; visibility: visible; z-index: 5; } */
+        .page.active { opacity: 1; visibility: visible; z-index: 5; } /* Re-added but controlled by JS on load */
+
+        /* --- SPLASH SCREEN STYLES (NEW) --- */
+        #splashPage {
+            /* NEW: Gradient based on app icon colors (orange and purple) */
+            background: linear-gradient(135deg, #FF9933 0%, #673AB7 100%); 
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+        }
+        #splashPage .logo-circle {
+            width: 150px; height: 150px; margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: var(--white); /* White background for the logo image */
+        }
+        #splashPage h1 {
+            color: var(--white); font-size: 2.5em; text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+
+        /* --- AUTH UI --- */
+
+        .auth-content {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            /* MODIFIED: Background consistent with image - light grey or white */
+            background: #f8f9fa; 
+        }
+
+        .auth-card {
+            background: white;
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            overflow: hidden;
+            animation: fadeIn 0.5s ease-out;
+            position: relative;
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Colored Header Line */
+        .auth-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 6px; background: var(--primary-gradient);
+        }
+
+        .auth-header {
+            text-align: center; padding: 40px 30px 10px 30px;
+        }
+        
+        /* MODIFIED: Increased size for a bolder logo on Auth pages */
+        .logo-circle {
+            width: 80px; 
+            height: 80px; 
+            margin: 0 auto 15px auto;
+            background: var(--white); /* Changed to white background for custom logo image */
+            color: var(--primary-color);
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-size: 2em;
+            /* MODIFIED: Purple Shadow */
+            box-shadow: 0 5px 15px rgba(103, 58, 183, 0.2); 
+            overflow: hidden; /* Important for containing the image */
+        }
+        /* NEW: Style for the image inside the logo-circle */
+        .logo-circle img {
+             width: 100%;
+             height: 100%;
+             object-fit: contain;
+        }
+
+
+        .auth-header h1 { font-size: 1.8em; margin: 0; color: #2d3436; font-weight: 700; }
+        .auth-header p { color: #b2bec3; font-size: 0.9em; margin-top: 5px; }
+        
+        /* NEW: Style for the Image Logo Container (Home Header) */
+        .logo-image-container {
+            /* MODIFIED: Increased size for a bigger logo */
+            width: 50px; 
+            height: 50px;
+            margin-right: 10px; /* Space between logo and text */
+            border-radius: 50%; /* Optional: Keep it circular if desired */
+            overflow: hidden;
+            flex-shrink: 0;
+            background: var(--white); /* White background for the logo */
+        }
+        .logo-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Use 'contain' to ensure the full logo is visible */
+        }
+
+
+        .auth-body { padding: 30px; }
+
+        .input-label { font-size: 0.8em; color: #636e72; font-weight: 600; margin-bottom: 5px; display: block; margin-left: 5px;}
+        .input-group { position: relative; margin-bottom: 20px; }
+        .input-group i {
+            position: absolute; top: 45px; left: 15px; transform: translateY(-50%);
+            color: #b2bec3; transition: color 0.3s;
+        }
+        
+        .auth-input {
+            width: 100%; padding: 15px 15px 15px 45px;
+            background: #f8f9fa; border: 2px solid #f1f2f6;
+            border-radius: 12px; font-size: 1em;
+            outline: none; transition: all 0.3s; box-sizing: border-box; font-family: 'Poppins', sans-serif; color: #333;
+        }
+        .auth-input:focus {
+            background: #fff; border-color: var(--primary-color);
+            /* MODIFIED: Purple Shadow */
+            box-shadow: 0 5px 15px rgba(103, 58, 183, 0.1); 
+        }
+        .auth-input:focus + i { color: var(--primary-color); } 
+        /* NEW: Address input style without icon padding */
+         .auth-input.no-icon {
+            padding: 15px;
+         }
+
+        /* NEW: Styles for password visibility toggle icon */
+        .toggle-password-icon {
+            position: absolute;
+            top: 50%; /* Center vertically */
+            transform: translateY(-50%);
+            right: 15px; /* Position on the right */
+            left: auto; /* Override default left position */
+            cursor: pointer;
+            color: #b2bec3; /* Default icon color */
+            z-index: 10; /* Ensure it's above the input field */
+        }
+        .toggle-password-icon:hover {
+            color: var(--primary-color);
+        }
+        /* Adjust input padding when a toggle icon is present on the right */
+        .auth-input.has-toggle-icon {
+            padding-right: 45px; /* Extra padding for the eye icon */
+        }
+
+
+        .btn-main {
+            width: 100%; padding: 16px;
+            background: var(--primary-gradient);
+            color: var(--white); border: none; border-radius: 12px;
+            font-size: 1.1em; font-weight: 600; cursor: pointer;
+            /* MODIFIED: Purple Shadow */
+            box-shadow: 0 8px 20px rgba(103, 58, 183, 0.25);
+            margin-bottom: 15px; transition: transform 0.2s;
+            display: flex; align-items: center; justify-content: center; /* Added for the new button */
+        }
+        .btn-main:active { transform: scale(0.98); }
+        .btn-main:disabled { background: #bdc3c7; cursor: not-allowed; box-shadow: none; opacity: 0.8; }
+        
+        .auth-switch { text-align: center; margin-top: 10px; font-size: 0.9em; color: #636e72; }
+        .auth-switch a { color: var(--primary-color); font-weight: 600; text-decoration: none; }
+        
+        #auth-error { 
+            color: var(--danger); text-align: center; margin-bottom: 15px; 
+            font-size: 0.9em; background: rgba(216, 67, 21, 0.1); padding: 10px; border-radius: 8px;
+            display: none; 
+        }
+        
+        /* New OTP Styles for Auth Pages (Kept for Checkout Verification) */
+        .otp-auth-section { display: none; margin-top: 20px; }
+        .otp-auth-group { display: flex; gap: 10px; margin-top: 10px; }
+        .otp-auth-input { width: 100%; padding: 15px; border: 2px solid #f1f2f6; border-radius: 12px; box-sizing: border-box; font-size: 1em; text-align: center; }
+        .resend-btn { font-size: 0.8em; color: var(--primary-color); background: none; border: none; cursor: pointer; padding: 5px; }
+
+        /* --- Header --- */
+        .app-header {
+            background: var(--primary-gradient);
+            padding: 50px 20px 20px 20px; color: var(--white);
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            /* MODIFIED: Purple Shadow */
+            box-shadow: 0 10px 20px rgba(103, 58, 183, 0.15); 
+        }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        /* MODIFIED: Updated H1 to accommodate the logo container */
+        .header-top h1 { font-size: 1.5em; margin: 0; font-weight: 700; display:flex; align-items:center;}
+        
+        .search-bar { margin-top: 15px; position: relative; }
+        .search-bar input {
+            width: 100%; padding: 15px 20px 15px 45px; border: none;
+            border-radius: 30px; font-size: 1em; box-sizing: border-box;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); outline: none;
+        }
+        .search-bar .fa-search {
+            position: absolute; left: 20px; top: 50%;
+            transform: translateY(-50%); color: var(--light-text);
+        }
+
+        /* --- Main Content --- */
+        main { flex: 1; overflow-y: auto; padding: 0 20px 100px 20px; }
+        
+        .section-title { font-size: 1.2em; font-weight: 700; margin: 20px 0 15px 0; color: #2d3436; }
+        .horizontal-scroll { display: flex; overflow-x: auto; padding-bottom: 20px; gap: 15px; scroll-behavior: smooth; }
+        .horizontal-scroll::-webkit-scrollbar { display: none; }
+        
+        /* --- START MODIFICATION 1: VERTICAL DISHES LAYOUT --- */
+        #dishesContainer {
+            /* Override horizontal-scroll properties for vertical display */
+            display: grid; 
+            grid-template-columns: 1fr 1fr; /* Two cards per row */
+            gap: 15px;
+            padding-bottom: 20px;
+            overflow-x: hidden;
+            scroll-behavior: auto;
+        }
+        /* Make sure cards inside the dishes container fill the grid space */
+        #dishesContainer .card {
+            width: 100%; /* Override the fixed width: 150px set by .card */
+            cursor: pointer; /* NEW: Card is clickable for PDP */
+        }
+        /* --- END MODIFICATION 1 --- */
+
+        .card {
+            flex-shrink: 0; /* Important for horizontal scroll children */
+            width: 150px; /* Default width for horizontal-scroll */
+            background-color: var(--white);
+            border-radius: 18px; box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            overflow: hidden; position: relative;
+        }
+        /* MODIFIED: Changed to object-fit: contain as requested */
+        .card img { 
+            width: 100%; 
+            height: 110px; 
+            object-fit: contain; /* MODIFIED: To show full image */
+            background-color: #f1f2f6; /* Added background for better display if image is small */
+        } 
+        .card-content { padding: 12px; }
+        .card-content h3 { margin: 0 0 4px 0; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600;}
+        .card-content p { color: var(--primary-color); font-weight: 700; font-size: 0.95em; margin: 0;}
+        .card-content p span.original { font-size: 0.8em; color: var(--light-text); text-decoration: line-through; margin-left: 5px; font-weight: 400;}
+        
+        /* MODIFIED: Add-to-cart button now sits beside the heart button */
+        .card-actions {
+            position: absolute; bottom: 10px; right: 10px;
+            display: flex; gap: 5px;
+            z-index: 2; /* Ensure buttons are clickable over the card's click event */
+        }
+        
+        .add-btn, .wishlist-btn {
+            background-color: var(--primary-color); color: var(--white);
+            border: none; border-radius: 50%; width: 32px; height: 32px;
+            cursor: pointer; 
+            display: flex; align-items: center; justify-content: center;
+            /* MODIFIED: Purple Shadow */
+            box-shadow: 0 4px 10px rgba(103, 58, 183, 0.4); 
+            transition: background-color 0.2s;
+        }
+        
+        /* NEW: Style for the Wishlist heart button (default inactive) */
+        .wishlist-btn {
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #ccc;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        /* NEW: Active/Selected Wishlist heart button (Use danger for better contrast) */
+        .wishlist-btn.active {
+            background-color: var(--danger); /* Use danger for active heart */
+            color: var(--white);
+            /* MODIFIED: Red/Orange Shadow */
+            box-shadow: 0 4px 10px rgba(216, 67, 21, 0.4); 
+        }
+        /* --- END MODIFIED CARD ACTIONS --- */
+
+        /* NEW: Discount Tag Style */
+        .discount-tag {
+            position: absolute;
+            top: 5px; right: 5px;
+            background-color: var(--danger); /* Red/Orange background */
+            color: var(--white);
+            padding: 2px 8px;
+            border-radius: 50%; /* Changed to a circle/badge shape */
+            width: 35px; height: 35px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 0.75em;
+            font-weight: 700;
+            z-index: 5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            line-height: 1;
+        }
+
+        /* --- UPDATED: PURPLE NAV & FLOATING CART --- */
+        nav {
+            /* MODIFIED: Changed to 'fixed' to prevent it from moving up when keyboard is open */
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0;
+            height: 70px; 
+            /* MODIFIED: Changed background to White as requested */
+            background: var(--white); 
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            border-radius: 30px 30px 0 0; z-index: 10;
+            padding: 0 30px; 
+            display: flex; justify-content: space-around; /* Changed to space-around for new layout */
+            align-items: center;
+            /* NEW: Ensure it stays within the mobile-container boundaries when fixed */
+            max-width: 414px;
+            margin: 0 auto;
+        }
+        
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            /* MODIFIED: Inactive items color changed for white background */
+            color: var(--light-text); 
+            cursor: pointer; position: relative;
+            transition: all 0.3s;
+        }
+        
+        /* Active item is Pure White and slightly lifted */
+        .nav-item.active { 
+            /* MODIFIED: Active item color changed for white background */
+            color: var(--primary-color); 
+            text-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        } 
+        
+        .nav-item i { font-size: 1.4em; margin-bottom: 2px;}
+        .nav-item p { margin: 0; font-size: 0.7em; font-weight: 500;}
+
+        /* Floating Cart Button */
+        #cart-fab-container {
+            position: fixed;
+            bottom: 85px; 
+            right: 20px;
+            z-index: 100;
+        }
+        .fab-btn {
+            width: 60px; height: 60px;
+            /* White button with Purple icon to contrast with the Purple bar */
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            color: var(--primary-color); font-size: 1.4em;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            cursor: pointer; position: relative;
+            transition: transform 0.2s;
+        }
+        .fab-btn:active { transform: scale(0.9); }
+        
+        #cart-count {
+            position: absolute; top: -2px; right: -2px;
+            background-color: var(--danger); color: white;
+            border-radius: 50%; width: 22px; height: 22px;
+            font-size: 0.8em; display: flex; justify-content: center; align-items: center; font-weight: 800;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border: 2px solid white;
+        }
+
+        /* --- Other Pages --- */
+        /* Profile Header style override for white text on purple background */
+        .page-header { padding: 40px 20px 20px 20px; text-align: center; position: relative; background: var(--secondary-color); }
+        .page-header h2 { margin: 0; font-size: 1.3em; color: #2d3436; font-weight: 700; }
+        .back-btn { position: absolute; left: 20px; top: 43px; font-size: 1.3em; cursor: pointer; color: #2d3436; padding: 5px;}
+
+        .page-header.profile-header {
+            background: var(--primary-gradient);
+            color: var(--white);
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+        }
+        .page-header.profile-header h2, .page-header.profile-header .back-btn {
+            color: var(--white);
+        }
+
+        .cart-item {
+            display: flex; align-items: center; background: var(--white);
+            padding: 12px; border-radius: 15px; margin-bottom: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        }
+        .cart-item img { width: 65px; height: 65px; border-radius: 12px; object-fit: cover; margin-right: 15px; }
+        .qty-controls { display: flex; align-items: center; gap: 8px; background: #f5f6fa; padding: 5px 10px; border-radius: 20px;}
+        .qty-controls button {
+            background: white; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+            color: var(--primary-color); font-weight: bold;
+            /* MODIFIED: Purple Accent */
+            box-shadow: 0 2px 5px rgba(103, 58, 183, 0.15); 
+        }
+
+        
+        .location-btn {
+            /* Kept magenta/pink from secondary-accent */
+            background-color: var(--secondary-accent); color: var(--white); 
+            width: 100%; padding: 12px; border-radius: 12px; border: none;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+            font-weight: 500; margin-bottom: 10px; transition: background 0.3s;
+        }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #2d3436; font-size: 0.9em; }
+        .form-control {
+            width: 100%; padding: 14px; border: 1px solid #dfe6e9;
+            border-radius: 12px; box-sizing: border-box; font-family: inherit; background: #fff;
+        }
+        /* NEW: Read-only field for checkout */
+        .form-control.read-only-field {
+            background: #f1f2f6; 
+            color: #636e72;
+            font-weight: 500;
+        }
+
+        .otp-group { display: flex; gap: 10px; margin-top: 10px; display: none; }
+        .verify-btn {
+            background-color: #2d3436; color: white; border: none;
+            padding: 0 20px; border-radius: 10px; cursor: pointer; white-space: nowrap; font-weight: 500;
+        }
+        .verified-badge {
+            color: var(--success); font-weight: 600; display: none; align-items: center; gap: 5px; margin-top: 10px; background: rgba(0, 184, 148, 0.1); padding: 8px 12px; border-radius: 8px; width: fit-content;
+        }
+        .or-divider {
+            display: flex; align-items: center; text-align: center; color: #b2bec3;
+            margin: 25px 0; font-weight: 600; font-size: 0.8em; letter-spacing: 1px;
+        }
+        .or-divider::before, .or-divider::after { content: ''; flex: 1; border-bottom: 1px solid #dfe6e9; }
+        .or-divider::before { margin-right: 15px; } .or-divider::after { margin-left: 15px; }
+
+        .order-card {
+            background: var(--white); border-radius: 18px; padding: 20px;
+            margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        /* NEW: DP Info Card for Orders (Light Purple/Lavender background) */
+        .dp-info-card {
+            display: flex; align-items: center; gap: 15px; background: #f3f0ff; 
+            padding: 15px; border-radius: 12px; margin-bottom: 15px;
+            border: 1px solid #dcd4ff;
+        }
+        .dp-info-card img {
+            width: 60px; height: 60px; border-radius: 50%; object-fit: cover;
+            border: 3px solid var(--primary-color);
+        }
+        .dp-info-card h4 { margin: 0; font-size: 1em; color: var(--text-color); }
+        .dp-info-card p { margin: 2px 0 0 0; font-size: 0.85em; color: var(--light-text); font-weight: 600;}
+        /* END NEW */
+        
+        .track-bar { display: flex; justify-content: space-between; position: relative; margin-top: 25px; }
+        .track-bar::before {
+            content: ''; position: absolute; top: 8px; left: 0; right: 0;
+            height: 4px; background: #f1f2f6; z-index: 1; border-radius: 2px;
+        }
+        .track-step { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; width: 25%; }
+        .dot {
+            width: 16px; height: 16px; background: #dfe6e9; border-radius: 50%;
+            border: 2px solid var(--white); transition: all 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .track-step p { font-size: 0.65em; margin-top: 8px; color: #b2bec3; font-weight: 600; text-transform: uppercase; }
+        .track-step.active .dot { background: var(--primary-color); transform: scale(1.4); border-color: #fff; }
+        .track-step.passed .dot { background: var(--primary-color); }
+        .track-step.passed p { color: var(--primary-color); }
+        
+        /* NEW: Order Tracking Buttons */
+        .order-action-buttons {
+            display: flex; gap: 10px; margin-top: 15px;
+        }
+        .order-action-buttons button {
+            flex: 1; background: var(--primary-color); color: white; border: none;
+            padding: 10px; border-radius: 8px; font-weight: 600;
+        }
+        
+        /* NEW: Support Topic Style (Retained the style, but removed the usage) */
+        .support-topic {
+            background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.03); display: flex; align-items: center;
+            cursor: pointer; transition: transform 0.1s;
+        }
+        .support-topic:active { transform: scale(0.99); }
+        /* MODIFIED: Using new secondary-accent color (Deep Pink/Magenta) */
+        .support-topic i { color: var(--secondary-accent); margin-right: 15px; font-size: 1.2em; } 
+        /* END NEW */
+        
+        /* SLIDER & CATEGORIES STYLING */
+        .slider-container {
+            width: 100%;
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+            background: var(--primary-gradient);
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+        .slider { display: flex; transition: transform 0.5s ease-in-out; }
+        .slide { min-width: 100%; height: 200px; }
+        /* Adjusted for better display of banner */
+        .slide img { width: 100%; height: 100%; object-fit: contain; } 
+        .fallback-slide {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+        .slider-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            z-index: 10;
+            border-radius: 50%;
+        }
+        .prev-slide { left: 10px; }
+        .next-slide { right: 10px; }
+        
+        /* CATEGORIES MODIFICATION: Smaller Rectangular Cards, Bigger Image */
+        .category-item-card {
+            flex-shrink: 0;
+            /* MODIFIED: Changed from 120px to 90px for smaller card */
+            width: 90px; 
+            height: 90px; 
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 5px; /* Reduced padding */
+            text-align: center;
+            border: 2px solid transparent; 
+            transition: all 0.2s;
+        }
+        .category-item-card img {
+            /* MODIFIED: Increased size from 70px to 60px relative to card size */
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            margin-bottom: 2px; /* Reduced margin */
+            border-radius: 0; 
+        }
+        .category-item-card i {
+             /* NEW: Style for default icon in category card */
+             font-size: 2em !important; /* Larger icon */
+             color:var(--primary-color); 
+             margin-bottom: 2px;
+        }
+        .category-item-card h4 {
+            font-size: 0.75em; /* Smaller font for small card */
+            margin: 0;
+            font-weight: 600;
+            color: var(--text-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+        .category-item-card.active {
+            border-color: var(--primary-color);
+            /* MODIFIED: Purple Shadow */
+            box-shadow: 0 4px 10px rgba(103, 58, 183, 0.3);
+            background-color: #f8f6ff; /* Light purple tint for active */
+        }
+        
+        /* NEW: PDP Image Slider */
+        .pdp-image-slider-container {
+            width: 100%;
+            height: 250px; /* Bigger image area */
+            overflow: hidden;
+            position: relative;
+            background: #f8f9fa;
+        }
+        .pdp-slider { display: flex; transition: transform 0.3s ease-out; height: 100%; }
+        .pdp-slide { min-width: 100%; height: 100%; }
+        .pdp-slide img { width: 100%; height: 100%; object-fit: contain; } /* NEW: Contain for PDP images */
+        .pdp-dots {
+             position: absolute; bottom: 10px; left: 0; right: 0;
+             display: flex; justify-content: center; gap: 5px;
+        }
+        .pdp-dot { width: 8px; height: 8px; background: #ccc; border-radius: 50%; cursor: pointer; }
+        .pdp-dot.active { background: var(--primary-color); }
+
+        .pdp-info h2 { font-size: 1.6em; font-weight: 700; margin-bottom: 5px; }
+        .pdp-info p { color: var(--light-text); margin-bottom: 20px; }
+        .pdp-price { font-size: 1.8em; font-weight: 700; color: var(--primary-color); }
+        .pdp-price span.original { font-size: 0.6em; color: var(--light-text); text-decoration: line-through; margin-left: 10px; font-weight: 400; }
+        
+        /* NEW: PDP Quantity Control */
+        .pdp-qty-controls {
+             display: flex; align-items: center; justify-content: space-between;
+             margin-top: 20px; padding: 15px 0; border-top: 1px solid #f1f2f6;
+        }
+        .pdp-qty-controls .qty-controls { background: var(--white); border: 1px solid #dfe6e9; }
+        .pdp-qty-controls .qty-controls span { font-size: 1.1em; font-weight: 600; }
+        /* Smaller text for minimum quantity warning */
+        #pdpMinQtyWarning { color: var(--danger); font-size: 0.85em; font-weight: 600; margin-top: 5px;}
+        
+    </style>
+</head>
+<body>
+
+    <div class="mobile-container">
+
+        <!-- NEW: SPLASH SCREEN (Screen 1 from Image) -->
+        <div id="splashPage" class="page active">
+            <div class="logo-circle">
+                <img src="https://i.ibb.co/yF2VjbMF/20260211-075938.png" alt="Shuvidha Seva Logo">
+            </div>
+            <h1>Shuvidha Seva</h1>
+        </div>
+        <!-- END SPLASH SCREEN -->
+
+
+        <!-- DETAILED LOGIN PAGE (Screen 2 from Image) -->
+        <div id="loginPage" class="page">
+            <div class="auth-content">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <div class="logo-circle">
+                            <img src="https://i.ibb.co/yF2VjbMF/20260211-075938.png" alt="Shuvidha Seva Logo">
+                        </div>
+                        <h1>Welcome Back</h1>
+                        <p>Sign in with your Email and Password</p> 
+                    </div>
+                    
+                    <div class="auth-body">
+                        <p id="auth-error"></p>
+                        
+                        <!-- LOGIN FORM -->
+                        <form id="login-form">
+                            <div class="input-group">
+                                <label class="input-label">* EMAIL ADDRESS</label>
+                                <input type="email" id="login-email" class="auth-input" placeholder="name@example.com" required>
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">* PASSWORD</label>
+                                <input type="password" id="login-password" class="auth-input has-toggle-icon" placeholder="********" required>
+                                <i class="fas fa-lock"></i>
+                                <i class="fas fa-eye toggle-password-icon"></i> 
+                            </div>
+                            <button class="btn-main" type="submit" id="loginBtn">Login to Shuvidha Seva</button> 
+                        </form>
+                        
+                        <div class="auth-switch">
+                            Don't have an account? <a href="#" id="gotoRegister">Register</a>
+                        </div>
+                        <!-- NEW: T&C and Privacy Links -->
+                        <div style="text-align:center; margin-top:20px; font-size:0.8em; color:#636e72;">
+                            By logging in, you agree to our 
+                            <a href="#" data-page="termsPage">Terms & Conditions</a> 
+                            and 
+                            <a href="#" data-page="privacyPage">Privacy Policy</a>.
+                        </div>
+                        <!-- END NEW -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DETAILED REGISTER PAGE (Similar style to Login Page) -->
+        <div id="registerPage" class="page">
+             <div class="auth-content">
+                <div class="auth-card" style="max-height: 80vh; overflow-y: auto; padding-bottom: 20px;">
+                    <div class="auth-header">
+                        <div class="logo-circle">
+                            <img src="https://i.ibb.co/yF2VjbMF/20260211-075938.png" alt="Shuvidha Seva Logo">
+                        </div>
+                        <h1>Create Account</h1>
+                        <p>Join the Shuvidha Seva community today!</p>
+                    </div>
+                    
+                    <div class="auth-body" style="padding-top: 0;">
+                        <!-- REGISTER FORM -->
+                        <form id="register-form">
+                            <p style="font-size: 0.8em; color: var(--danger); text-align: center; margin-bottom: 20px;">* All fields are required</p>
+                            <!-- Name -->
+                            <div class="input-group">
+                                <label class="input-label">* FULL NAME</label>
+                                <input type="text" id="regName" class="auth-input" placeholder="John Doe" required>
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <!-- Mobile Number -->
+                            <div class="input-group">
+                                <label class="input-label">* MOBILE NUMBER</label>
+                                <input type="tel" id="regMobile" class="auth-input" placeholder="9876543210" maxlength="10" required>
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <!-- Email -->
+                            <div class="input-group">
+                                <label class="input-label">* EMAIL ADDRESS</label>
+                                <input type="email" id="registerEmail" class="auth-input" placeholder="name@example.com" required>
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <!-- Password -->
+                            <div class="input-group">
+                                <label class="input-label">* PASSWORD</label>
+                                <input type="password" id="registerPassword" class="auth-input has-toggle-icon" placeholder="********" required>
+                                <i class="fas fa-lock"></i>
+                                <i class="fas fa-eye toggle-password-icon"></i>
+                            </div>
+                            <!-- Confirm Password -->
+                            <div class="input-group">
+                                <label class="input-label">* CONFIRM PASSWORD</label>
+                                <input type="password" id="confirmPassword" class="auth-input has-toggle-icon" placeholder="********" required>
+                                <i class="fas fa-lock"></i>
+                                <i class="fas fa-eye toggle-password-icon"></i>
+                            </div>
+                            
+                            <!-- NEW ADDRESS FIELDS -->
+                            <h3 style="font-size:1.1em; font-weight:700; margin-top:30px; margin-bottom:15px; color:var(--primary-color);">Delivery Address</h3>
+                            
+                            <div class="input-group">
+                                <label class="input-label">* PINCODE</label>
+                                <input type="tel" id="regPincode" class="auth-input no-icon" placeholder="Enter Pincode" maxlength="6" required>
+                            </div>
+
+                            <div class="input-group">
+                                <label class="input-label">* STATE</label>
+                                <input type="text" id="regState" class="auth-input no-icon" placeholder="State Name" required>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label class="input-label">* DISTRICT</label>
+                                <input type="text" id="regDistrict" class="auth-input no-icon" placeholder="District Name" required>
+                            </div>
+
+                            <div class="input-group">
+                                <label class="input-label">* VILLAGE / BUILDING / HOUSE</label>
+                                <input type="text" id="regAddressLine" class="auth-input no-icon" placeholder="Flat No, Building Name, Village" required>
+                            </div>
+                            <!-- END NEW ADDRESS FIELDS -->
+
+
+                            <button class="btn-main" type="submit" id="registerBtn">Sign Up Now</button> 
+                        </form>
+
+                        <div class="auth-switch">
+                            Already have an account? <a href="#" id="gotoLogin">Login</a>
+                            <!-- DELETED: Removed Forgot Password link as per request -->
+                        </div>
+                        <!-- NEW: T&C and Privacy Links -->
+                        <div style="text-align:center; margin-top:20px; font-size:0.8em; color:#636e72;">
+                            By signing up, you agree to our 
+                            <a href="#" data-page="termsPage">Terms & Conditions</a> 
+                            and 
+                            <a href="#" data-page="privacyPage">Privacy Policy</a>.
+                        </div>
+                        <!-- END NEW -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HOME (Screen 4 from Image) -->
+        <div id="appContainer" class="page">
+            <header class="app-header">
+                <div class="header-top">
+                    <h1>
+                        <div class="logo-image-container">
+                            <img src="https://i.ibb.co/yF2VjbMF/20260211-075938.png" alt="Shuvidha Seva Logo">
+                        </div>
+                        Shuvidha Seva 
+                    </h1>
+                </div>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="home-search-input" placeholder="What are you craving?">
+                </div>
+            </header>
+
+            <main>
+                <!-- START: SLIDER SECTION (from snippet 2, styled for purple theme) -->
+                <h2 class="section-title" style="margin-top: 25px;">Promotions & Offers</h2>
+                <div class="slider-container">
+                    <div class="slider" id="home-slider">
+                        <!-- Slides will be injected here -->
+                    </div>
+                    <button class="slider-nav prev-slide"><i class="fas fa-chevron-left"></i></button>
+                    <button class="slider-nav next-slide"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <!-- END: SLIDER SECTION -->
+                
+                <!-- START: CATEGORY SECTION (Now Rectangular) -->
+                <h2 class="section-title">Browse Categories</h2>
+                <div class="horizontal-scroll" id="categoriesContainer">
+                    <!-- Category Rectangular Cards will be injected here -->
+                </div>
+                <!-- END: CATEGORY SECTION -->
+
+
+                <!-- START: RECOMMENDED DISHES (ALL PRODUCTS) SECTION -->
+                <h2 class="section-title" id="dishesSectionTitle">Recommended Dishes</h2>
+                <a href="#" id="showAllDishesBtn" onclick="showAllDishes()" style="display:none; font-size:0.9em; color:var(--primary-color); margin-bottom:15px; font-weight:600;">Show All Products</a>
+                <div id="dishesContainer"></div>
+                <!-- END: RECOMMENDED DISHES SECTION -->
+            </main>
+
+            <!-- Floating Cart Button -->
+            <div id="cart-fab-container">
+                <div class="fab-btn" id="cartFabBtn"> <!-- MODIFIED: data-page removed, handler via JS -->
+                    <i class="fas fa-shopping-basket"></i>
+                    <div id="cart-count">0</div>
+                </div>
+            </div>
+
+            <!-- PURPLE NAV BAR -->
+            <!-- NOTE: The 'nav' element is kept inside appContainer but its CSS position is fixed. -->
+            <nav>
+                <div class="nav-item active" data-page="appContainer"><i class="fas fa-home"></i><p>Home</p></div>
+                <div class="nav-item" id="ordersNavBtn"><i class="fas fa-receipt"></i><p>Orders</p></div> <!-- MODIFIED: data-page removed, handler via JS -->
+                <div class="nav-item" id="wishlistNavBtn"><i class="fas fa-heart"></i><p>Wishlist</p></div> <!-- MODIFIED: data-page removed, handler via JS -->
+                <div class="nav-item" id="profileNavBtn">
+                    <i class="fas fa-user"></i>
+                    <p>Profile</p>
+                </div> <!-- MODIFIED: data-page removed, handler via JS -->
+            </nav>
+        </div>
+
+        <!-- PRODUCT DETAIL PAGE (NEW) -->
+        <div id="productDetailPage" class="page">
+            <header class="page-header">
+                <i class="fas fa-arrow-left back-btn" data-target="appContainer"></i>
+                <h2 id="pdpHeaderTitle">Product Details</h2>
+            </header>
+            
+            <div style="flex:1; overflow-y:auto;">
+                <!-- Image Slider -->
+                <div class="pdp-image-slider-container">
+                    <div class="pdp-slider" id="pdpSlider">
+                        <!-- Slides injected here -->
+                    </div>
+                    <div class="pdp-dots" id="pdpDots"></div>
+                </div>
+
+                <div style="padding: 20px;">
+                    <!-- Price & Discount -->
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div>
+                            <span class="pdp-price" id="pdpPrice">₹0.00</span>
+                            <span class="pdp-price" id="pdpOriginalPrice"></span>
+                        </div>
+                        <div class="discount-tag" id="pdpDiscountTag" style="display:none;"></div>
+                    </div>
+                    
+                    <!-- Product Info -->
+                    <div class="pdp-info">
+                        <h2 id="pdpName"></h2>
+                        <p id="pdpUnit"></p>
+                    </div>
+
+                    <!-- Quantity & Add to Cart -->
+                    <div class="pdp-qty-controls">
+                        <!-- MODIFIED: Removed '(Max 5)' from label as requested -->
+                        <label style="font-weight:600;">Quantity:</label> 
+                        <div class="qty-controls">
+                            <button id="pdpQtyMinus"><i class="fas fa-minus"></i></button>
+                            <span id="pdpQuantity">1</span> <!-- MODIFIED START QTY -->
+                            <button id="pdpQtyPlus"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <!-- DELETED: Removed max quantity warning as requested -->
+
+                    <!-- MODIFIED: Removed '(Max 5)' from button text as requested -->
+                    <button class="btn-main" id="pdpAddToCartBtn" style="margin-top:20px;">
+                        <i class="fas fa-shopping-basket"></i> Add to Cart 
+                    </button>
+
+                    <h3 style="font-size:1.1em; font-weight:700; margin-top:30px; margin-bottom:10px; color:var(--primary-color);">Product Description</h3>
+                    <p id="pdpDescription" style="line-height:1.6; color:var(--text-color);"></p>
+                    
+                    <button class="btn-main wishlist-btn" id="pdpWishlistBtn" style="background:#fff; color:var(--text-color); box-shadow:none; margin-top:30px;">
+                       <i class="fas fa-heart" style="color:#ccc;"></i> Add to Wishlist
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+        <!-- END PRODUCT DETAIL PAGE -->
+
+
+        <!-- WISHLIST PAGE -->
+        <div id="wishlistPage" class="page">
+             <header class="page-header">
+                <i class="fas fa-arrow-left back-btn" data-target="appContainer"></i>
+                <h2>My Wishlist</h2>
+            </header>
+             <div style="flex:1; padding:20px; overflow-y:auto;" id="wishlistContainer">
+                <!-- Wishlist items will be rendered here -->
+            </div>
+        </div>
+        <!-- END WISHLIST PAGE -->
+
+        <!-- CART -->
+        <div id="cartPage" class="page">
+            <header class="page-header">
+                <i class="fas fa-arrow-left back-btn" data-target="appContainer"></i>
+                <h2>My Cart</h2>
+            </header>
+            <div style="flex:1; padding:20px; overflow-y:auto;" id="cart-content-area">
+                <!-- MODIFIED: Updated Min Order message text -->
+                <p id="order-constraint-warning" style="color:var(--danger); text-align:center; margin-bottom:15px; display:none;">
+                    Minimum order: 3 items AND ₹50.00
+                </p>
+                <div id="cartItemsContainer"></div>
+                <div id="cart-summary" style="margin-top:30px; border-top:1px solid var(--border-color); padding-top:20px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Subtotal</span><span id="subtotal-price">₹0.00</span></div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Delivery Fee</span><span> ₹ 10 </span></div>
+                    <div style="display:flex; justify-content:space-between; font-weight:700; font-size:1.4em; color:#2d3436; margin-top:10px;"><span>Total</span><span id="total-price">Free delivery Charges;</span></div>
+                    <button class="btn-main" id="goToCheckoutBtn" style="margin-top:25px;">Proceed to Checkout</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHECKOUT (MODIFIED FOR EDITABLE DELIVERY ADDRESS) -->
+        <div id="checkoutPage" class="page">
+            <header class="page-header">
+                <i class="fas fa-arrow-left back-btn" data-target="cartPage"></i>
+                <h2>Checkout</h2>
+            </header>
+            <div style="flex:1; padding:20px; overflow-y:auto;">
+                
+                <!-- DELIVERY ADDRESS (Editable fields for Name, Mobile, Pincode, AddressLine) -->
+                <h3 style="font-size:1.1em; font-weight:700; margin-bottom:15px; color:var(--primary-color);">1. Confirm Delivery Address</h3>
+
+                <div class="form-group">
+                    <label>Customer Name</label>
+                    <input type="text" id="addressName" class="form-control" placeholder="Full Name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Mobile Number (For Delivery)</label>
+                    <input type="tel" id="contactPhone" class="form-control" placeholder="10-digit Mobile Number" maxlength="10" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Pincode</label>
+                    <input type="tel" id="addressPincode" class="form-control" placeholder="Pincode" maxlength="6" required>
+                </div>
+
+                <div class="form-group">
+                    <label>State & District (From Registration - Read Only)</label>
+                    <input type="text" id="addressStateDistrict" class="form-control read-only-field" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label>Village / Building / House</label>
+                    <input type="text" id="addressFullLine" class="form-control" placeholder="Flat No, Building Name, Village" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Delivery Instructions / Landmark (Optional)</label>
+                    <input type="text" id="addressInstructions" class="form-control" placeholder="e.g., Near Hanuman Temple, Call before arriving">
+                </div>
+                
+
+                <div class="or-divider">ORDER CONFIRMATION (COD Only)</div>
+
+                <button class="btn-main" id="placeOrderBtn" disabled>Confirm Order</button>
+            </div>
+        </div>
+
+        <!-- PROFILE PAGE (SIMPLIFIED) -->
+        <div id="profilePage" class="page">
+            <header class="page-header profile-header">
+                <i class="fas fa-arrow-left back-btn" data-target="appContainer"></i>
+                <h2>My Profile</h2>
+            </header>
+            <div style="flex:1; padding:20px; overflow-y:auto;">
+                <!-- User Info Card (SIMPLIFIED) -->
+                <div class="order-card" style="text-align:center;">
+                    <!-- Profile Image/Icon placeholder -->
+                    <div class="logo-circle" id="profileImageContainer" style="background:var(--secondary-color); margin: 0 auto 15px auto; color:var(--text-color); position:relative; overflow:hidden;">
+                        <i class="fas fa-user" id="profileImageDefaultIcon"></i>
+                    </div>
+                    <!-- Keeping upload input for image, but removing the link if not needed -->
+                    <input type="file" id="profileImageUploadInput" accept="image/*" style="display: none;"> 
+                    <a href="#" id="changeProfileImageLink" style="font-size:0.8em; color:var(--primary-color); text-decoration:none;">Change Photo</a>
+
+                    <h3 id="profileUserName" style="margin:10px 0 0 0; color:#2d3436;">Loading...</h3>
+                    <p id="profileUserEmail" style="color:#636e72; font-size:0.9em;">Loading...</p>
+                    <p id="profileUserMobileDisplay" style="color:#636e72; font-size:0.9em; font-weight: 600;">Mobile: Loading...</p>
+                    <p id="profileUserAddressDisplay" style="color:#636e72; font-size:0.9em; margin-top: 5px;">Address: Loading...</p>
+                    
+                    <button class="btn-main" id="profileLogoutBtn" style="background:var(--danger); margin-top:20px; width:50%;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- END PROFILE PAGE -->
+        
+        <!-- NEW: TERMS & CONDITIONS PAGE -->
+        <div id="termsPage" class="page">
+            <header class="page-header">
+                <!-- Target changed to loginPage, as profile page no longer links to it -->
+                <i class="fas fa-arrow-left back-btn" data-target="loginPage"></i>
+                <h2>Terms & Conditions</h2>
+            </header>
+            <!-- UPDATED CONTENT START (Hindi) -->
+            <div style="flex:1; padding:20px; overflow-y:auto; font-size: 0.9em; line-height: 1.6;">
+                <h3 style="color:var(--primary-color); margin-top:0;">Terms and Conditions</h3>
+                <p><strong>Shuvidha Seva</strong> app ka istemal karne ke liye aapko niche diye gaye niyamo (terms) ka palan karna hoga:</p>
+
+                <h4 style="color:var(--primary-color); font-weight:700; margin-top:15px; margin-bottom:5px;">1. Minimum Order Rule</h4>
+                <p>App se order karne ke liye kam se kam <strong style="color:var(--danger);">3 items</strong> aur kul rashi <strong style="color:var(--danger);">₹50.00</strong> se zyada honi chahiye।</p>
+
+                <h4 style="color:var(--primary-color); font-weight:700; margin-top:15px; margin-bottom:5px;">2. Delivery Charges</h4>
+                <p>Har order par <strong style="color:var(--danger);">₹10 fixed delivery charge</strong> liya jayega, chahe order kitna bhi bada ho।</p>
+                
+                <!-- DELETED: Removed "Per Item Quantity Rule" section -->
+
+                <h4 style="color:var(--primary-color); font-weight:700; margin-top:15px; margin-bottom:5px;">3. Account Responsibility</h4>
+                <p>Aap apne mobile number aur password ki suraksha ke liye khud zimmedar hain। Galat jankari dene par account band kiya ja sakta hai।</p>
+
+                <h4 style="color:var(--primary-color); font-weight:700; margin-top:15px; margin-bottom:5px;">4. Delivery Time</h4>
+                <p>Hum koshish karte hain ki order jaldi deliver ho, lekin mausam ya traffic ki wajah se deri ho sakti hai।</p>
+
+                <h4 style="color:var(--primary-color); font-weight:700; margin-top:15px; margin-bottom:5px;">5. Order Cancellation</h4>
+                <p>Order place hone ke baad agar humne saaman pack kar diya hai, toh cancellation swikar nahi kiya jayega।</p>
+
+                <h4 style="color:var(--primary-color); font-weight:700; margin-top:15px; margin-bottom:5px;">6. Contact Us</h4>
+                <p>Kisi bhi shikayat ya sawal ke liye aap humein <strong style="color:var(--primary-color);">shuvidhaseva1@gmail.com</strong> par email kar sakte hain.</p>
+                
+                <div style="text-align: center; margin-top: 30px; font-size: 0.8em; color: var(--light-text);">
+                    &copy; 2026 Shuvidha Seva. All Rights Reserved.
+                </div>
+            </div>
+            <!-- UPDATED CONTENT END -->
+        </div>
+        <!-- END NEW: TERMS & CONDITIONS PAGE -->
+
+        <!-- NEW: PRIVACY POLICY PAGE -->
+        <div id="privacyPage" class="page">
+            <header class="page-header">
+                <!-- Target changed to loginPage, as profile page no longer links to it -->
+                <i class="fas fa-arrow-left back-btn" data-target="loginPage"></i>
+                <h2>Privacy Policy</h2>
+            </header>
+            <!-- UPDATED CONTENT START (Hindi) -->
+            <div style="flex:1; padding:20px; overflow-y:auto; font-size: 0.9em; line-height: 1.6;">
+                <h3 style="color:var(--primary-color); margin-top:0;">App & Developer Information</h3>
+                <ul style="list-style: none; padding: 0; margin-bottom: 20px;">
+                    <li><strong>Application Name:</strong> Shuvidha Seva</li>
+                    <li><strong>Package ID:</strong> com.shuvidha.seva</li>
+                    <li><strong>Developer:</strong> Prabhat Acharya</li>
+                    <li><strong>Contact Email:</strong> shuvidhaseva1@gmail.com</li>
+                    <li><strong>Last Updated:</strong> 03 February 2026</li>
+                </ul>
+                
+                <h3 style="color:var(--primary-color); margin-top:0;">Privacy Policy - Shuvidha Seva</h3>
+                <p>Aapki privacy hamare liye bahut mahatvapurn hai। Yeh policy batati hai ki <strong>Shuvidha Seva</strong> aapka data kaise collect aur istemal karta hai।</p>
+
+                <h4 style="color:var(--primary-color); font-weight:700; margin-top:15px; margin-bottom:5px;">1. Data Jo Hum Collect Karte Hain</h4>
+                <p>Hum sirf wahi jankari lete hain jo aapke order ko deliver karne ke liye zaruri hai:</p>
+                <ul style="margin-left:20px; margin-top:-5px;">
+                    <li>Aapka Naam</li>
+                    <li>Mobile Number</li>
+                    <li>Email Address</li>
+                    <li>Delivery Address (Ghar ka pata)</li>
+                </ul>
+
+                <h4 style="color:var(--primary-color); font-weight:700; margin-top:15px; margin-bottom:5px;">2. Data Ka Istemal</h4>
+                <p>Aapka data sirf niche diye gaye kaamo ke liye use hota hai:</p>
+                <ul style="margin-left:20px; margin-top:-5px;">
+                    <li>Aapke order ko process aur deliver karne ke liye।</li>
+                    <li>Aapko order status updates bhejne ke liye।</li>
+                    <li>App ki service ko behtar banane ke liye।</li>
+                </ul>
+
+                <h4 style="color:var(--primary-color); font-weight:700; margin-top:15px; margin-bottom:5px;">3. Data Security</h4>
+                <p>Hum aapka personal data kisi bhi third-party ko bechte ya share nahi karte hain। Aapka data puri tarah surakshit hai।</p>
+
+                <h4 style="color:var(--primary-color); font-weight:700; margin-top:15px; margin-bottom:5px;">4. Order Rules</h4>
+                <p>Shuvidha Seva par order karne ke liye minimum 3 items aur ₹50 ka order hona anivarya hai। Har order par ₹10 delivery charge liya jayega।</p>
+
+                <h4 style="color:var(--primary-color); font-weight:700; margin-top:15px; margin-bottom:5px;">5. Contact Us</h4>
+                <p>Agar aapko koi sawal hai, toh aap humse <strong style="color:var(--primary-color);">shuvidhaseva1@gmail.com</strong> par sampark kar sakte hain ya app ke support section mein message karein।</p>
+
+                <div style="text-align: center; margin-top: 30px; font-size: 0.8em; color: var(--light-text);">
+                    <p>&copy; 2026 Shuvidha Seva. All Rights Reserved.</p>
+                </div>
+            </div>
+            <!-- UPDATED CONTENT END -->
+        </div>
+        <!-- END NEW: PRIVACY POLICY PAGE -->
+        
+        <!-- REMOVED: SUPPORT PAGE -->
+
+        <!-- ORDERS -->
+        <div id="ordersPage" class="page">
+            <header class="page-header">
+                <i class="fas fa-arrow-left back-btn" data-target="appContainer"></i>
+                <h2>My Orders</h2>
+            </header>
+            <div style="flex:1; padding:20px; overflow-y:auto;" id="ordersListContainer"></div>
+        </div>
+
+        <!-- THANK YOU -->
+        <div id="thankYouPage" class="page">
+            <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%; padding:40px; text-align:center;">
+                <div style="width:100px; height:100px; background:#e0f0ff; border-radius:50%; display:flex; justify-content:center; align-items:center; margin-bottom:20px;">
+                    <i class="fas fa-check" style="font-size:3em; color:var(--primary-color);"></i>
+                </div>
+                <h2 style="color:#2d3436;">Order Placed!</h2>
+                <p style="color:#636e72;">Your food is being prepared by Shuvidha Seva. Check your email for confirmation! (Simulated)</p> 
+                <button class="btn-main" id="trackOrderBtn" style="margin-top:30px;">Track Order</button>
+                <a href="#" id="backToHomeBtn" style="margin-top:20px; display:block; color:var(--light-text); text-decoration:none;">Back to Home</a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Firebase Configuration (FIXED: Added missing configuration) -->
+    <script>
+        // !! IMPORTANT: REPLACE THESE VALUES WITH YOUR ACTUAL FIREBASE PROJECT CONFIGURATION !!
+        // Configuration matched with Admin App
+const firebaseConfig = {
+  apiKey: "AIzaSyD2ZpkPF0EIT4uK0YULGgBvfU7kHeCml2Q",
+  authDomain: "shuvidha-seva-32df0.firebaseapp.com",
+  databaseURL: "https://shuvidha-seva-32df0-default-rtdb.firebaseio.com",
+  projectId: "shuvidha-seva-32df0",
+  storageBucket: "shuvidha-seva-32df0.firebasestorage.app",
+  messagingSenderId: "508915247632",
+  appId: "1:508915247632:web:91c3df82b4eae3c750f895",
+  measurementId: "G-MQ6BPYD4EP"
+};
+
+    </script>
+    
+    <!-- Firebase SDK (v9 Syntax) -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            signOut,
+            sendPasswordResetEmail // For password reset (although only simulated message is given in UI)
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { 
+            getDatabase, 
+            ref, 
+            get, 
+            set, 
+            onValue, 
+            remove, 
+            push,
+            update
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+        
+        // Initialize Firebase
+        // NOTE: firebaseConfig is now defined in the script tag above.
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        
+        let cart = []; // Local cart array
+        let wishlist = []; // Local wishlist array (stores product keys)
+        let currentUser = null;
+        let userData = null; // Stores full user data including address
+        let userPincode = null; // Stores user's pincode for filtering
+        let allDishesData = []; // Stores all dishes for filtering/rendering
+        let ordersListener = null;
+        let selectedPaymentMethod = 'COD'; // Fixed to COD
+        
+        let currentPdpDish = null; // NEW: Store the currently viewed dish object for PDP
+        let pdpQuantity = 1; // MODIFIED: Start at minimum quantity of 1 for PDP
+        let pdpAutoScrollInterval; // NEW: For auto-scroll
+
+        // MODIFIED: Updated Minimum Order Constants
+        const MIN_ORDER_QTY = 3; 
+        const MIN_ORDER_AMOUNT = 50;
+        // DELETED: Removed Max Item Quantity constraint as requested by user.
+        const MAX_ITEM_QTY = Infinity; // NEW: Setting to infinity to disable max quantity check as requested
+        
+        // --- UPDATED DATA PLACEHOLDERS (Fast Food, Grocery, Treats, with new images) ---
+        // Image URLs are simulated or from placeholder services.
+        const placeholderCategories = [
+            { id: "fastfood", name: "Fast Food", imageUrl: "https://cdn-icons-png.flaticon.com/512/857/857681.png" }, // Burger/Fast Food Icon
+            { id: "grocery", name: "Grocery", imageUrl: "https://cdn-icons-png.flaticon.com/512/3081/3081977.png" }, // Shopping basket Icon
+            { id: "treats", name: "Treats", imageUrl: "https://cdn-icons-png.flaticon.com/512/4740/4740118.png" }, // Ice Cream/Dessert Icon
+            { id: "indian", name: "Indian", imageUrl: "https://cdn-icons-png.flaticon.com/512/5753/5753127.png" }, 
+        ];
+        
+        // UPDATED SLIDER IMAGES (Using the new Banner URL)
+        const placeholderSliderImages = [
+            // Image 1: Aapki Suvidha, Hamari Seva (Using the banner image)
+            { downloadURL: "https://i.ibb.co/SwMq0bXj/Picsart-26-01-27-11-31-49-432.png", title: "Aapki Suvidha, Hamari Seva" }, 
+        ];
+        
+        const placeholderDishes = [
+            // Fast Food (Combo - Updated URL)
+            { 
+                key: "dish_ff1", 
+                name: "Mega Meal Burger Combo", 
+                price: { final: 180.00, restaurantPrice: 150.00, adminFee: 30.00 }, 
+                discount: 15, 
+                unit: "1 Combo", 
+                description: "Extra large double patty burger with crispy fries and a soft drink.", 
+                // Using the isolated fast food combo image
+                imageUrl: "https://i.ibb.co/hJ3RSF0f/pngtree-group-of-fast-food-products-png-image-14008130.png", 
+                images: ["https://i.ibb.co/hJ3RSF0f/pngtree-group-of-fast-food-products-png-image-14008130.png"], 
+                categoryId: "fastfood", 
+                pincode: "ALL" 
+            },
+            // Fast Food (Samosa - Updated URL)
+            { 
+                key: "dish_ff2", 
+                name: "Aloo Samosa (3 Pcs)", 
+                price: { final: 45.00, restaurantPrice: 35.00, adminFee: 10.00 }, 
+                discount: 0, 
+                unit: "3 Pieces", 
+                description: "Crispy and hot potato samosas with tangy chutney.", 
+                // Using the samosa image
+                imageUrl: "https://i.ibb.co/yFJw2NQm/samosa-recipe.jpg", 
+                images: ["https://i.ibb.co/yFJw2NQm/samosa-recipe.jpg"], 
+                categoryId: "fastfood", 
+                pincode: "ALL" 
+            },
+            // Grocery (Fourtun/kachi Ghani - Updated URL)
+            { 
+                key: "dish_gr1", 
+                name: "Fourtun kachi Ghani 1kg", 
+                price: { final: 70.00, restaurantPrice: 65.00, adminFee: 5.00 },
+                discount: 0, 
+                unit: "1kg Pouch", 
+                description: "Vacuum sealed for extra freshness.", 
+                // Using the Fourtun kachi Ghani image
+                imageUrl: "https://i.ibb.co/0j6w4zyL/61qs-W9-zfa-L-SX679.jpg", 
+                images: ["https://i.ibb.co/0j6w4zyL/61qs-W9-zfa-L-SX679.jpg"], 
+                categoryId: "grocery", 
+                pincode: "ALL" 
+            },
+            // Grocery (Fourtun/Soya health  - Updated URL)
+            { 
+                key: "dish_gr2", 
+                name: "Fourtun Soya health 1Kg", 
+                price: { final: 65.00, restaurantPrice: 60.00, adminFee: 5.00 },
+                discount: 5, 
+                unit: "1 Kg Pack", 
+                description: "Whole wheat flour for soft rotis.", 
+                // Using the Fourtun Soya health image
+                imageUrl: "https://i.ibb.co/pBKKxD0t/612-KEk-Qn-TJL-SX679.jpg", 
+                images: ["https://i.ibb.co/pBKKxD0t/612-KEk-Qn-TJL-SX679.jpg"], 
+                categoryId: "grocery", 
+                pincode: "ALL" 
+            },
+            // Treats (Cadbury Silk Oreo - Updated URL)
+            { 
+                key: "dish_tr1", 
+                name: "Premium Chocolate Bar", 
+                price: { final: 180.00, restaurantPrice: 160.00, adminFee: 20.00 },
+                discount: 10, 
+                unit: "1 Large Bar", 
+                description: "A delicious milk chocolate bar with crunchy bits and a smooth center.", 
+                // Using the newly provided image for a different chocolate treat
+                imageUrl: "https://i.ibb.co/7JXPjrVT/sliding-images-jpeg-1df64a82-d773-41cd-bcdd-d919c0d65374jpgts1715597648-de4a52a2-8ad3-4360-bd6c-3493.jpg", 
+                images: ["https://i.ibb.co/7JXPjrVT/sliding-images-jpeg-1df64a82-d773-41cd-bcdd-d919c0d65374jpgts1715597648-de4a52a2-8ad3-4360-bd6c-3493.jpg"], 
+                categoryId: "treats", 
+                pincode: "ALL" 
+            },
+        ];
+        
+        // Placeholder DP details for 'On Way' status if real DP data is missing
+        const simulatedDriver = {
+            name: "Rajesh Kumar (Fallback)",
+            mobile: "9876543210",
+            imageUrl: "https://cdn-icons-png.flaticon.com/512/4140/4140037.png" 
+        };
+
+        // --- THEME COLOR LINKING LOGIC (NEW) ---
+        async function fetchThemeSettings() {
+             try {
+                 const themeRef = ref(db, 'settings/theme/customerThemeColor');
+                 const snapshot = await get(themeRef);
+                 const customerThemeColor = snapshot.val();
+                 
+                 if (customerThemeColor && /^#[0-9A-F]{6}$/i.test(customerThemeColor)) {
+                     // Apply the fetched color to the CSS variables
+                     document.documentElement.style.setProperty('--primary-color', customerThemeColor);
+                     // Set a simple gradient based on the new primary color (Note: Gradient should ideally be calculated)
+                     // For simplicity, using a slightly darker version for the gradient end if possible, otherwise use the same color
+                     const fallbackGradientEnd = customerThemeColor; 
+                     document.documentElement.style.setProperty('--primary-gradient', `linear-gradient(135deg, ${customerThemeColor} 0%, ${fallbackGradientEnd} 100%)`);
+                 }
+             } catch (e) {
+                 console.error("Failed to fetch theme settings:", e);
+                 // Fallback to default CSS variables if fetch fails
+             }
+        }
+        // --- END THEME COLOR LINKING LOGIC ---
+
+
+        // --- UTILITY & NAVIGATION ---
+        const showPage = (id) => {
+             // NEW: Auth check for restricted pages
+            const restrictedPages = ['ordersPage', 'wishlistPage', 'profilePage', 'cartPage', 'checkoutPage', 'productDetailPage'];
+            if (restrictedPages.includes(id) && !currentUser) {
+                // Do not show an alert on initial load or if the user clicks a non-interactive element first.
+                if (id !== 'appContainer') { // Only redirect to login if attempting a restricted action
+                   id = 'loginPage';
+                }
+            }
+            
+            document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === id));
+            document.getElementById('auth-error').style.display = 'none'; 
+
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            // MODIFIED: Navigation item selection logic adjusted
+            const navItemElement = document.querySelector(`.nav-item[data-page="${id}"], #ordersNavBtn, #wishlistNavBtn, #profileNavBtn`);
+            if (navItemElement) {
+                navItemElement.classList.add('active');
+            } else if (id === 'appContainer' && !document.querySelector('.nav-item.active')) { // Special case for Home page on initial load
+                 document.querySelector('.nav-item[data-page="appContainer"]').classList.add('active');
+            }
+
+
+            if(id === 'checkoutPage') {
+                if(currentUser) { 
+                    loadCheckoutAddress(); // Loads initial data into editable fields
+                }
+                // Add listeners for validation on checkout page
+                document.getElementById('addressName').oninput = checkOrderValidity;
+                document.getElementById('contactPhone').oninput = checkOrderValidity;
+                document.getElementById('addressPincode').oninput = checkOrderValidity;
+                document.getElementById('addressFullLine').oninput = checkOrderValidity;
+
+                checkOrderValidity(); 
+            }
+            if(id === 'ordersPage') loadOrders();
+            if(id === 'profilePage') loadProfilePage(); 
+            if(id === 'wishlistPage') loadWishlist();
+            
+            const fab = document.getElementById('cart-fab-container');
+            // MODIFIED: FAB only visible on home, categories, and dishes search page (appContainer)
+            fab.style.display = (id === 'appContainer') ? 'block' : 'none';
+
+            // NEW: Stop PDP auto-scroll when leaving the page
+            if (id !== 'productDetailPage' && pdpAutoScrollInterval) {
+                 clearInterval(pdpAutoScrollInterval);
+            }
+
+            // Reset scroll on content pages
+            const scrollableElement = document.querySelector(`#${id} > div:nth-child(2)`);
+            if (scrollableElement && scrollableElement.style.overflowY === 'auto') {
+                 scrollableElement.scrollTop = 0;
+            }
+        };
+        
+        // NEW: Event listeners for Auth-restricted elements
+        document.getElementById('cartFabBtn').onclick = () => authCheckAndNavigate('cartPage');
+        document.getElementById('ordersNavBtn').onclick = () => authCheckAndNavigate('ordersPage');
+        document.getElementById('wishlistNavBtn').onclick = () => authCheckAndNavigate('wishlistPage');
+        document.getElementById('profileNavBtn').onclick = () => authCheckAndNavigate('profilePage');
+
+        // NEW: Auth-checking navigation handler for restricted elements
+        const authCheckAndNavigate = (targetPage) => {
+             if (!currentUser) {
+                  showPage('loginPage');
+             } else {
+                  showPage(targetPage);
+             }
+        }
+
+        const showError = (msg) => {
+            const err = document.getElementById('auth-error');
+            err.textContent = msg;
+            err.style.display = 'block';
+        }
+
+        // Global event listeners for navigation (non-restricted pages like Terms/Privacy/Back Buttons)
+        document.querySelectorAll('[data-target], [data-page]').forEach(b => 
+            b.addEventListener('click', (e) => {
+                const target = e.currentTarget.dataset.target || e.currentTarget.dataset.page;
+                // Only allow direct navigation if it's a back button or an unrestricted page
+                if(target && target !== 'ordersPage' && target !== 'wishlistPage' && target !== 'profilePage') {
+                    showPage(target);
+                }
+            })
+        );
+
+
+        document.getElementById('gotoRegister').onclick = () => showPage('registerPage');
+        document.getElementById('gotoLogin').onclick = () => showPage('loginPage');
+        document.getElementById('goToCheckoutBtn').onclick = () => showPage('checkoutPage');
+        document.getElementById('trackOrderBtn').onclick = () => showPage('ordersPage');
+        document.getElementById('backToHomeBtn').onclick = () => showPage('appContainer');
+        document.getElementById('profileLogoutBtn').onclick = () => { 
+            signOut(auth); 
+            cart=[]; 
+            wishlist=[]; 
+            userPincode=null;
+            userData=null;
+            updateCartUI(); 
+            showPage('loginPage'); // Go to login after logout
+        };
+        // REMOVED: Need Support Button Handler
+        document.getElementById('changeProfileImageLink').onclick = (e) => { 
+            e.preventDefault(); 
+            document.getElementById('profileImageUploadInput').click(); 
+        };
+        document.getElementById('profileImageUploadInput').onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                     document.getElementById('profileImageContainer').innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+
+        // --- AUTHENTICATION (v9 Syntax) ---
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true; btn.textContent = 'Signing In...'; showError("Please wait...");
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                btn.disabled = false; btn.textContent = 'Login to Shuvidha Seva';
+                showError("Login Failed: Invalid email or password.");
+                console.error("Login Error:", error.message);
+            }
+        });
+
+        // NEW: Password Visibility Toggle for all password fields
+        document.querySelectorAll('.toggle-password-icon').forEach(icon => {
+            icon.addEventListener('click', function() {
+                // The input field is two previous siblings before the eye icon if lock icon is present,
+                // or one previous sibling if no lock icon (which shouldn't happen for password fields here).
+                const input = this.previousElementSibling.previousElementSibling; 
+                if (input && (input.type === 'password' || input.type === 'text')) {
+                    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    input.setAttribute('type', type);
+                    this.classList.toggle('fa-eye-slash'); // Toggle the eye slash icon
+                }
+            });
+        });
+
+
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('regName').value;
+            const mobile = document.getElementById('regMobile').value.trim();
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value; // Get confirm password
+            const pincode = document.getElementById('regPincode').value.trim();
+            const state = document.getElementById('regState').value;
+            const district = document.getElementById('regDistrict').value;
+            const addressLine = document.getElementById('regAddressLine').value;
+
+            const btn = document.getElementById('registerBtn');
+            
+            // Validation for password and confirm password
+            if (password !== confirmPassword) {
+                showError("Passwords do not match. Please try again.");
+                return;
+            }
+
+            if(!name || !mobile || !email || !password || !pincode || !state || !district || !addressLine) {
+                showError("All fields marked with * are required."); return;
+            }
+            if(mobile.length !== 10 || isNaN(mobile)) {
+                showError("Please enter a valid 10-digit mobile number."); return;
+            }
+            if(pincode.length !== 6 || isNaN(pincode)) {
+                showError("Please enter a valid 6-digit pincode."); return;
+            }
+            if(password.length < 6) {
+                showError("Password must be at least 6 characters."); return;
+            }
+
+            btn.disabled = true; btn.textContent = 'Creating Account...'; showError("Please wait...");
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                // v9: Use user.uid for ref
+                await set(ref(db, 'users/' + user.uid), { 
+                    mobile: mobile,
+                    name: name,
+                    email: email,
+                    pincode: pincode,
+                    address: { state: state, district: district, line: addressLine },
+                    createdAt: new Date().toISOString()
+                });
+                
+                // Reset form fields
+                e.target.reset();
+
+            } catch (error) {
+                btn.disabled = false; btn.textContent = 'Sign Up Now';
+                if (error.code === 'auth/email-already-in-use') {
+                    // FIX: Informative message for existing email
+                    showError("This email is already registered. Please use the Login tab.");
+                } else {
+                    showError("Registration Failed: " + error.message);
+                }
+                console.error("Registration Error:", error.message);
+            }
+        });
+
+        // --- SPLASH SCREEN LOGIC ---
+        let splashTimer;
+
+        // NEW function to handle post-splash-screen initialization and redirects
+        function handleAuthRedirect() {
+             clearTimeout(splashTimer); // Clear any existing splash timer
+             
+             // Check authentication status
+             onAuthStateChanged(auth, (user) => {
+                 currentUser = user;
+                 if (user) {
+                     fetchUserPincodeAndData(); 
+                     listenForWishlistUpdates(); 
+                     showPage('appContainer');
+                 } else { 
+                     currentUser = null; 
+                     userPincode = null;
+                     userData = null;
+                     updateCartUI(); 
+                     initHomeUI(true); // Render home UI (guest mode)
+                     showPage('loginPage'); // Go to login page
+                 }
+             });
+        }
+        
+        // --- On Page Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+             // 1. Show Splash screen initially (Set active class in HTML)
+             // 2. Start timer for splash duration
+             splashTimer = setTimeout(handleAuthRedirect, 2000); // 2 seconds splash duration
+        });
+        // --- END SPLASH SCREEN LOGIC ---
+
+        // --- USER DATA & PINCODE LOGIC (Auth Fix Applied Here) ---
+        async function fetchUserPincodeAndData() {
+             if (!currentUser) return;
+             
+             try {
+                 const snapshot = await get(ref(db, 'users/' + currentUser.uid));
+                 const snapData = snapshot.val();
+                 
+                 // FIX 1: Differentiate Customer from DP
+                 if (!snapData) {
+                      const dpCheck = await get(ref(db, 'delivery_partners/' + currentUser.uid));
+                      if (dpCheck.exists()) {
+                          // Logged in as DP in Customer App -> Log out
+                          alert("You are logged in as a Delivery Partner. Please use the Partner App.");
+                          signOut(auth);
+                          return;
+                      }
+                      // Not found in either (Shouldn't happen post-register) -> Continue
+                 }
+                 
+                 // FIX 2: Ensure full userData object is saved for profile display on every login
+                 if (snapData) {
+                    userData = {
+                        name: snapData.name || "User Name",
+                        mobile: snapData.mobile || "N/A",
+                        email: snapData.email || currentUser.email,
+                        pincode: snapData.pincode || "N/A",
+                        address: {
+                            state: snapData.address?.state || "N/A",
+                            district: snapData.address?.district || "N/A",
+                            line: snapData.address?.line || "N/A"
+                        }
+                    };
+                    userPincode = userData.pincode;
+                 } else {
+                     // Fallback if no user data found (shouldn't happen for a logged-in user who registered)
+                     userData = {
+                         name: currentUser.email.split('@')[0],
+                         mobile: "N/A",
+                         email: currentUser.email,
+                         pincode: "N/A",
+                         address: { state: "N/A", district: "N/A", line: "N/A" }
+                     };
+                     userPincode = null;
+                 }
+                 
+                 fetchData();
+                 
+             } catch (e) {
+                 console.error("Failed to fetch user data:", e);
+                 // Fallback: If DB fetch fails, populate minimal data from auth object
+                 userData = {
+                     name: currentUser.email.split('@')[0],
+                     mobile: "N/A",
+                     email: currentUser.email,
+                     pincode: "N/A",
+                     address: { state: "N/A", district: "N/A", line: "N/A" }
+                 };
+                 userPincode = null;
+                 fetchData();
+             }
+        }
+        
+        function loadCheckoutAddress() {
+             // Load registered data into editable fields as default
+            if (userData && userData.address) {
+                document.getElementById('addressName').value = userData.name || currentUser.email.split('@')[0];
+                document.getElementById('contactPhone').value = userData.mobile || '';
+                document.getElementById('addressPincode').value = userData.pincode || '';
+                // State/District remain read-only, pulled from registration/profile
+                document.getElementById('addressStateDistrict').value = `${userData.address.state || 'N/A'}, ${userData.address.district || 'N/A'}`;
+                document.getElementById('addressFullLine').value = userData.address.line || '';
+                document.getElementById('addressInstructions').value = ''; // Clear instructions
+            } else {
+                // Clear fields if address is missing so user must input it
+                document.getElementById('addressName').value = currentUser.email.split('@')[0];
+                document.getElementById('contactPhone').value = '';
+                document.getElementById('addressPincode').value = '';
+                document.getElementById('addressStateDistrict').value = 'Address not set. Update in Profile.';
+                document.getElementById('addressFullLine').value = '';
+                document.getElementById('addressInstructions').value = ''; 
+            }
+        }
+
+        // --- ORDER PLACEMENT (v9 Syntax) ---
+        document.getElementById('placeOrderBtn').onclick = async () => {
+             if (!currentUser) { alert("Please login to place an order."); showPage('loginPage'); return;}
+
+            // Get data from the *current* checkout fields
+            const customerName = document.getElementById('addressName').value.trim();
+            const phone = document.getElementById('contactPhone').value.trim();
+            const pincode = document.getElementById('addressPincode').value.trim();
+            const addressFullLine = document.getElementById('addressFullLine').value.trim();
+            const stateDistrict = document.getElementById('addressStateDistrict').value; // Read-only from initial load
+            const instructions = document.getElementById('addressInstructions').value; 
+            
+            // Re-validate all editable fields immediately before placing order
+            if (!customerName || phone.length !== 10 || isNaN(phone) || pincode.length !== 6 || isNaN(pincode) || !addressFullLine) {
+                 // Should not happen if checkOrderValidity runs correctly, but for safety:
+                 alert("Please fill in all required fields correctly (Name, 10-digit Mobile, 6-digit Pincode, Address Line).");
+                 return;
+            }
+
+            const totalQuantity = cart.reduce((a,b)=>a+b.quantity,0);
+            const subtotal = cart.reduce((a,b)=>a+b.price*b.quantity,0);
+
+            if (totalQuantity < MIN_ORDER_QTY || subtotal < MIN_ORDER_AMOUNT) {
+                 console.log(`Minimum order: ${MIN_ORDER_QTY} items AND ₹${MIN_ORDER_AMOUNT.toFixed(2)}.`); return;
+            }
+            
+            // Construct the address using the (possibly) changed fields
+            const fullAddress = `${addressFullLine}, ${stateDistrict} (Pincode: ${pincode}) - Instructions: ${instructions || 'None'}`;
+            const deliveryFee = 10.00;
+            const total = (subtotal + deliveryFee).toFixed(2);
+            
+            // FIX: Ensure cart items are copied correctly
+            const itemsToStore = cart.map(item => {
+                const fullDish = allDishesData.find(d => d.key === item.id);
+                // NEW: Store the price split for Admin app to calculate revenue/earning
+                const priceData = fullDish?.price || { final: item.price, restaurantPrice: item.price, adminFee: 0 };
+                
+                return {
+                    id: item.id,
+                    name: item.name,
+                    price: parseFloat(item.price).toFixed(2), // Discounted price for total calculation
+                    img: item.img,
+                    quantity: item.quantity,
+                    // NEW: Store price split for revenue calculation in Admin App
+                    restaurantPrice: parseFloat(priceData.restaurantPrice || item.price).toFixed(2),
+                    adminFee: parseFloat(priceData.adminFee || 0).toFixed(2),
+                };
+            });
+
+            const order = {
+                userId: currentUser.uid,
+                customerName: customerName, 
+                email: currentUser.email,
+                phone: phone, 
+                address: fullAddress, 
+                items: itemsToStore, // Use the cleaned/copied array
+                subtotal: subtotal.toFixed(2),
+                deliveryFee: deliveryFee.toFixed(2),
+                total: total,
+                // MODIFIED: Use the capitalized DB status
+                status: 'PLACED', 
+                method: 'COD', // Fixed to COD
+                timestamp: Date.now()
+            };
+            
+            document.getElementById('placeOrderBtn').disabled = true;
+            document.getElementById('placeOrderBtn').textContent = 'Confirming Order...';
+
+            try {
+                // v9: Use push for creating new order key
+                const newOrderRef = push(ref(db, 'orders'));
+                await set(newOrderRef, order);
+                
+                // Clear cart locally and clear the UI
+                cart=[]; updateCartUI(); 
+
+                document.getElementById('placeOrderBtn').disabled = false;
+                document.getElementById('placeOrderBtn').textContent = 'Confirm Order';
+                showPage('thankYouPage'); 
+            } catch (e) {
+                document.getElementById('placeOrderBtn').disabled = false;
+                document.getElementById('placeOrderBtn').textContent = 'Error Confirming Order';
+                console.error("Order failed:", e.message);
+            }
+        };
+        
+        function checkOrderValidity() {
+            // Check editable fields
+            const customerName = document.getElementById('addressName')?.value.trim();
+            const phoneVal = document.getElementById('contactPhone')?.value.trim();
+            const pincodeVal = document.getElementById('addressPincode')?.value.trim();
+            const addressLineVal = document.getElementById('addressFullLine')?.value.trim();
+            
+            // Check cart constraints
+            const totalQuantity = cart.reduce((a,b)=>a+b.quantity,0);
+            const subtotal = cart.reduce((a,b)=>a+b.price*b.quantity,0);
+            const cartConstraintsMet = totalQuantity >= MIN_ORDER_QTY && subtotal >= MIN_ORDER_AMOUNT;
+            
+            // Check address field validity
+            const isAddressValid = customerName && phoneVal?.length === 10 && !isNaN(phoneVal) && pincodeVal?.length === 6 && !isNaN(pincodeVal) && addressLineVal;
+            
+            const orderBtn = document.getElementById('placeOrderBtn');
+            const warning = document.getElementById('order-constraint-warning');
+
+
+            // Cart Page Check (Checks Cart constraints only)
+            if (document.getElementById('cartPage').classList.contains('active')) {
+                if (!cartConstraintsMet) {
+                    warning.style.display = 'block';
+                    // MODIFIED: Text updated with new constants
+                    warning.innerHTML = `Minimum order: ${MIN_ORDER_QTY} items AND ₹${MIN_ORDER_AMOUNT.toFixed(2)}`;
+                    document.getElementById('goToCheckoutBtn').disabled = true;
+                    document.getElementById('goToCheckoutBtn').style.opacity = '0.6';
+                } else {
+                    warning.style.display = 'none';
+                    document.getElementById('goToCheckoutBtn').disabled = false;
+                    document.getElementById('goToCheckoutBtn').style.opacity = '1';
+                }
+            }
+
+
+            // Checkout Page Check (Checks Cart constraints AND Address fields)
+            if (orderBtn) {
+                if (cartConstraintsMet && isAddressValid) { 
+                    orderBtn.disabled = false;
+                    orderBtn.style.opacity = '1';
+                    orderBtn.textContent = `Confirm Order`;
+                } else {
+                    orderBtn.disabled = true;
+                    orderBtn.style.opacity = '0.6';
+                    if (!cartConstraintsMet) {
+                        orderBtn.textContent = `Min Order ₹${MIN_ORDER_AMOUNT.toFixed(2)} / ${MIN_ORDER_QTY} items`;
+                    } else if (!isAddressValid) {
+                        orderBtn.textContent = "Fill all required address details (Name, Mobile, Pincode, Village/Building)";
+                    } else {
+                         orderBtn.textContent = "Confirm Order"; // Should not happen but as fallback
+                    }
+                }
+            }
+        }
+
+        // --- WISHLIST LOGIC (v9 Syntax) ---
+        // MODIFIED: Only takes dishKey now and relies on allDishesData
+        window.toggleWishlist = async (dishKey) => {
+             if (!currentUser) {
+                 showPage('loginPage');
+                 return;
+             }
+             
+            const dish = allDishesData.find(d => d.key === dishKey);
+            if (!dish) { console.error("Dish not found for key:", dishKey); return; }
+
+            const wishlistProductRef = ref(db, `users/${currentUser.uid}/wishlist/${dishKey}`);
+            
+            // Check if item is already in wishlist array
+            const isCurrentlyWished = wishlist.includes(dishKey);
+            
+            if (isCurrentlyWished) {
+                // Remove from Firebase
+                await remove(wishlistProductRef);
+                // Remove from local wishlist array for immediate UI update
+                wishlist = wishlist.filter(key => key !== dishKey);
+            } else {
+                 // Add to Firebase
+                 await set(wishlistProductRef, { 
+                    key: dish.key, // FIX: Ensure key is saved in the object for retrieval
+                    name: dish.name, 
+                    // FIX: Use the discounted customerPrice for saving/display (from the modified object)
+                    price: parseFloat(dish.customerPrice || 0), 
+                    imageUrl: dish.images?.[0] || dish.imageUrl,
+                    discount: dish.discount || 0,
+                    unit: dish.unit || 'Unit N/A'
+                });
+                // Add to local wishlist array
+                wishlist.push(dishKey);
+            }
+            
+            // Update UI elements that depend on wishlist state
+            updateWishlistIconInCards(dishKey, !isCurrentlyWished);
+            updatePdpWishlistButton(dishKey);
+            if (document.getElementById('wishlistPage').classList.contains('active')) {
+                 loadWishlist(); // Re-render the wishlist page if active
+            }
+        };
+
+        function listenForWishlistUpdates() {
+            if (!currentUser) return;
+            // v9: Use onValue
+            onValue(ref(db, `users/${currentUser.uid}/wishlist`), (snapshot) => {
+                wishlist = []; 
+                if (snapshot.exists()) {
+                    snapshot.forEach(childSnap => {
+                        wishlist.push(childSnap.key);
+                    });
+                }
+                // Update UI everywhere that might depend on wishlist state
+                updateAllCardWishlistIcons();
+                updatePdpWishlistButtonIfOpen();
+                if (document.getElementById('wishlistPage').classList.contains('active')) {
+                     loadWishlist();
+                }
+            });
+        }
+        
+        function loadWishlist() {
+            const container = document.getElementById('wishlistContainer');
+            // v9: Fetch one time for current data
+            get(ref(db, `users/${currentUser.uid}/wishlist`)).then(snapshot => {
+                const items = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(childSnap => {
+                        items.push(childSnap.val());
+                    });
+                }
+                
+                container.innerHTML = ''; 
+
+                if (items.length === 0) {
+                     container.innerHTML = '<div style="text-align:center; margin-top:50px; color:#999;"><i class="fas fa-heart-broken" style="font-size:3em; margin-bottom:15px;"></i><p>Your wishlist is empty. Start adding items!</p></div>';
+                     return;
+                }
+
+                items.forEach(d => {
+                     const dishImage = d.imageUrl || 'https://via.placeholder.com/150';
+                     const discount = d.discount || 0;
+                     const discountedPrice = parseFloat(d.price || 0);
+                     // Calculate original price from the saved discounted price
+                     const originalPrice = discountedPrice / (1 - discount / 100); 
+
+                    // MODIFIED: Use purple for the Add button
+                    container.innerHTML += `
+                        <div class="cart-item">
+                            <img src="${dishImage}" alt="${d.name}">
+                            <div style="flex:1;">
+                                <h4 style="margin:0; font-size:1em;">${d.name}</h4>
+                                <p style="margin:2px 0 0 0; color:var(--primary-color); font-weight:600;">₹${discountedPrice.toFixed(2)}
+                                    ${discount > 0 ? `<span style="font-size: 0.8em; color: var(--light-text); text-decoration: line-through; margin-left: 5px;">₹${originalPrice.toFixed(2)}</span>` : ''}
+                                </p>
+                                ${discount > 0 ? `<p style="margin:0; font-size:0.8em; color:var(--danger);">Save ${discount}%</p>` : ''}
+                            </div>
+                            <div style="display:flex; gap:10px;">
+                                <button class="btn-main" onclick="addToCart('${d.key}', 1)" style="width:auto; padding:8px 15px; font-size:0.9em; margin-bottom:0; background:var(--primary-gradient);">
+                                    <i class="fas fa-shopping-basket"></i> Add
+                                </button>
+                                <button class="wishlist-btn active" onclick="toggleWishlist('${d.key}')" style="background-color: var(--danger); color:white; box-shadow: 0 4px 10px rgba(216, 67, 21, 0.4);">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        // --- DATA FETCHING & RENDERING (v9 Syntax) ---
+        function renderDishes(dishesList) {
+            const c = document.getElementById('dishesContainer');
+            c.innerHTML = '';
+            if(dishesList.length === 0) { 
+                c.innerHTML = '<p style="padding:10px; color:#666; width:100%; text-align:center;">No dishes found for this selection or your Pincode.</p>'; 
+            }
+
+            dishesList.forEach(d => {
+                const dishImage = d.imageUrl || 'https://via.placeholder.com/150';
+                // Check wishlist status using the `wishlist` array
+                const isWished = wishlist.includes(d.key);
+                const wishBtnClass = `wishlist-btn ${isWished ? 'active' : ''}`;
+                const wishIconClass = `fas ${isWished ? 'fa-heart' : 'fa-heart'}`; // Heart icon always, class determines state
+                
+                const discount = d.discount || 0;
+                // FIX: Use the pre-calculated customerPrice for card display
+                const discountedPrice = parseFloat(d.customerPrice || 0); 
+                // Reconstruct original price (which is the final price before discount)
+                const originalPrice = parseFloat(d.price.final || 0);
+                
+                // FIX: Price Display (Kitna ka tha kitna ka liye)
+                const priceDisplay = discount > 0 
+                    ? `₹${discountedPrice.toFixed(2)} <span class="original">₹${originalPrice.toFixed(2)}</span>`
+                    : `₹${originalPrice.toFixed(2)}`;
+
+                const discountTag = discount > 0 ? `<div class="discount-tag">-${discount}%</div>` : ''; // NEW
+
+                // Card is now clickable via showProductDetail, with event.stopPropagation() on buttons
+                c.innerHTML += `
+                    <div class="card" onclick="showProductDetail('${d.key}')"> 
+                        ${discountTag}
+                        <img src="${dishImage}" alt="${d.name}">
+                        <div class="card-actions">
+                            <button class="${wishBtnClass}" onclick="event.stopPropagation(); toggleWishlist('${d.key}')">
+                                <i class="${wishIconClass}"></i>
+                            </button>
+                            <button class="add-btn" onclick="event.stopPropagation(); addToCart('${d.key}', 1)">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="card-content">
+                            <h3>${d.name}</h3>
+                            <p>${priceDisplay}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        // Helper to update wishlist icons in all cards on the page
+        function updateAllCardWishlistIcons() {
+            document.querySelectorAll('.card .wishlist-btn').forEach(btn => {
+                const dishKey = btn.getAttribute('onclick').match(/'([^']+)'/)[1]; // Extract key from onclick
+                const isWished = wishlist.includes(dishKey);
+                btn.classList.toggle('active', isWished);
+                // The icon itself remains 'fa-heart', the 'active' class handles the visual state
+            });
+        }
+        
+        // Helper to update a specific card's wishlist icon
+        function updateWishlistIconInCards(dishKey, isWished) {
+             const cardContainer = document.getElementById('dishesContainer');
+             if (cardContainer) {
+                 const buttons = cardContainer.querySelectorAll('.card .wishlist-btn');
+                 buttons.forEach(btn => {
+                      const keyFromBtn = btn.getAttribute('onclick').match(/'([^']+)'/)[1];
+                      if (keyFromBtn === dishKey) {
+                           btn.classList.toggle('active', isWished);
+                      }
+                 });
+             }
+        }
+        
+        function renderCategories(categoriesList) {
+            const c = document.getElementById('categoriesContainer');
+            c.innerHTML = '';
+            
+            if(categoriesList.length === 0) { 
+                c.innerHTML = '<p style="padding:10px; color:#666; width:100%; text-align:center; font-style:italic;">Admin has not added any categories yet. Please wait.</p>'; 
+                return;
+            }
+            
+            // --- MODIFIED: ADD 'ALL' CATEGORY FIRST ---
+             c.innerHTML += `
+                 <div class="category-item-card active" data-category="ALL" onclick="showAllDishes()">
+                     <!-- MODIFIED: Increased icon size for consistency with new image size -->
+                     <i class="fas fa-list"></i>
+                     <h4>All</h4>
+                 </div>
+            `;
+            // --- END MODIFIED ---
+
+            categoriesList.forEach((cat) => {
+                const categoryId = cat.id || cat.name;
+                // MODIFIED: Increased fallback icon size to 2.2em via CSS
+                const iconOrImage = cat.imageUrl ? `<img src="${cat.imageUrl}" alt="${cat.name}">` : `<i class="fas fa-utensils"></i>`; 
+                
+                c.innerHTML += `
+                    <div class="category-item-card" data-category="${categoryId}" onclick="filterDishesByCategory('${categoryId}')">
+                        ${iconOrImage}
+                        <h4>${cat.name}</h4>
+                    </div>
+                `;
+            });
+            // Ensure 'All' is the active one on initial render (important when logged in)
+            if (document.querySelector('.category-item-card[data-category="ALL"]')) {
+                 document.querySelectorAll('.category-item-card').forEach(b => b.classList.remove('active'));
+                 document.querySelector('.category-item-card[data-category="ALL"]')?.classList.add('active');
+            }
+        }
+        
+        function renderSlider(sliderImages) {
+            const slider = document.getElementById('home-slider');
+            const nextBtn = document.querySelector('.next-slide');
+            const prevBtn = document.querySelector('.prev-slide');
+            const images = sliderImages.length > 0 ? sliderImages : placeholderSliderImages;
+            
+            // MODIFIED: Added check for banner images before rendering
+            if (images.length === 0) {
+                 slider.innerHTML = `<div class="slide fallback-slide">Welcome to Shuvidha Seva</div>`;
+                 nextBtn.style.display = 'none';
+                 prevBtn.style.display = 'none';
+                 return;
+            }
+
+
+            slider.innerHTML = images.map(img => `
+                <div class="slide"><img src="${img.downloadURL}" alt="Slider Image"></div>
+            `).join('');
+            
+            if (images.length > 1) {
+                initSlider();
+                nextBtn.style.display = 'block';
+                prevBtn.style.display = 'block';
+            } else {
+                 // MODIFIED: Fallback for single image
+                 slider.style.transform = `translateX(0%)`;
+                 nextBtn.style.display = 'none';
+                 prevBtn.style.display = 'none';
+            }
+        }
+        
+        async function fetchData() {
+            try {
+                // 1. Fetch Categories
+                let snapshot = await get(ref(db, 'categories'));
+                let categoriesData = [];
+                snapshot.forEach(c => { categoriesData.push({ id: c.key, ...c.val() }); });
+                renderCategories(categoriesData.length > 0 ? categoriesData : placeholderCategories);
+                
+                // 2. Fetch Dishes - PINCODE FILTERING
+                snapshot = await get(ref(db, 'dishes'));
+                allDishesData = []; 
+                snapshot.forEach(d => { 
+                    const dish = { key: d.key, ...d.val() };
+                    dish.categoryId = dish.categoryId || 'uncategorized';
+                    dish.pincode = dish.pincode || 'ALL';
+                    // NEW: Ensure all fields are present for PDP/card rendering
+                    dish.discount = dish.discount || 0;
+                    dish.unit = dish.unit || 'Unit N/A'; // Using 'unit' field from admin
+                    dish.description = dish.description || 'No description available.';
+                    
+                    // FIX: Ensure correct price object is used/created
+                    dish.price = dish.price && typeof dish.price === 'object' 
+                        ? dish.price 
+                        : { final: parseFloat(dish.price || 0), restaurantPrice: parseFloat(dish.price || 0), adminFee: 0 };
+                        
+                    // Store the actual customer-facing price (final price - discount) for easy access in cards/cart
+                    const finalPriceBeforeDiscount = parseFloat(dish.price.final || 0);
+                    dish.customerPrice = finalPriceBeforeDiscount * (1 - dish.discount / 100); 
+                    
+                    // NEW: Ensure images array exists
+                    dish.images = Array.isArray(dish.images) && dish.images.length > 0 ? dish.images : [dish.imageUrl || 'https://via.placeholder.com/150'];
+                    
+                    if (userPincode && dish.pincode !== 'ALL' && dish.pincode !== userPincode) {
+                        return; 
+                    }
+                    allDishesData.push(dish); 
+                });
+                showAllDishes();
+
+                // 3. Fetch Slider Images
+                snapshot = await get(ref(db, 'banners')); // MODIFIED: Changed ref from sliderImages to banners
+                const sliderImages = [];
+                snapshot.forEach(s => { 
+                    const banner = s.val();
+                    if (banner.imageUrl) { // Only use image banners for the slider
+                         sliderImages.push({ downloadURL: banner.imageUrl, title: banner.title });
+                    }
+                });
+                renderSlider(sliderImages);
+                
+            } catch (error) {
+                console.error("Error fetching app data:", error);
+                // Use placeholders on error
+                allDishesData = placeholderDishes.map(d => {
+                    const priceObj = d.price;
+                    const finalPriceBeforeDiscount = parseFloat(priceObj.final || 0);
+                    // Add customerPrice property to placeholder dishes
+                    return { 
+                        ...d, 
+                        price: priceObj, // Keep the full object
+                        customerPrice: finalPriceBeforeDiscount * (1 - (d.discount || 0) / 100), 
+                    };
+                });
+                renderCategories(placeholderCategories);
+                showAllDishes();
+                renderSlider(placeholderSliderImages);
+            }
+        }
+        
+        window.filterDishesByCategory = (categoryId) => {
+            const filtered = allDishesData.filter(d => d.categoryId === categoryId);
+            document.querySelectorAll('.category-item-card').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.category-item-card[data-category="${categoryId}"]`)?.classList.add('active');
+            renderDishes(filtered);
+            document.getElementById('showAllDishesBtn').style.display = 'block';
+            document.getElementById('dishesSectionTitle').textContent = 'Dishes in Category';
+            document.getElementById('dishesSectionTitle').scrollIntoView({ behavior: 'smooth' });
+        };
+        
+        window.showAllDishes = () => {
+            renderDishes(allDishesData); 
+            document.getElementById('showAllDishesBtn').style.display = 'none';
+            document.getElementById('dishesSectionTitle').textContent = 'Recommended Dishes';
+            document.querySelectorAll('.category-item-card').forEach(b => b.classList.remove('active'));
+            document.querySelector('.category-item-card[data-category="ALL"]')?.classList.add('active'); // Set 'All' as active
+        }
+
+        document.getElementById('home-search-input').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredDishes = allDishesData.filter(dish => dish.name.toLowerCase().includes(searchTerm));
+            renderDishes(filteredDishes);
+            document.getElementById('showAllDishesBtn').style.display = 'block';
+            document.getElementById('dishesSectionTitle').textContent = `Search Results for "${e.target.value}"`;
+        });
+
+        // MODIFIED: Implements Max 5 constraint
+        window.addToCart = (id, quantity = 1) => {
+             if (!currentUser) {
+                 showPage('loginPage');
+                 return;
+             }
+            
+            const dish = allDishesData.find(d => d.key === id);
+            if (!dish) { console.error("Dish not found for key:", id); return; }
+
+            // FIX: Use customerPrice for the price in the cart
+            const discountedPrice = parseFloat(dish.customerPrice || 0);
+
+            const ex = cart.find(i=>i.id===id);
+            
+            // Check max quantity constraint before adding (MAX_ITEM_QTY is now Infinity)
+            let newQuantity = quantity;
+            if(ex) {
+                 newQuantity = ex.quantity + quantity;
+            }
+
+            if (newQuantity > MAX_ITEM_QTY) {
+                 // DELETED: Removed alert for max quantity. Check will always fail for finite numbers.
+                 // The logic here is now effectively disabled, as requested.
+            } else {
+                 // Proceed with regular add/update
+                 if(ex) {
+                     ex.quantity = newQuantity;
+                 } else {
+                     // Store discounted price in cart item
+                     cart.push({id: dish.key, name: dish.name, price: discountedPrice, img: dish.imageUrl, quantity: newQuantity});
+                 }
+            }
+            
+            updateCartUI();
+        };
+
+        // MODIFIED: Implements Max 5 and Min 1 constraint
+        window.modQty = (id,n) => {
+            const i = cart.find(x=>x.id===id);
+            if(i) { 
+                const newQty = i.quantity + n;
+
+                if (newQty < 1) {
+                     cart=cart.filter(x=>x.id!==id); // Remove if quantity goes to 0 or below
+                } else if (newQty > MAX_ITEM_QTY) {
+                     // DELETED: Removed alert for max quantity as requested.
+                     return; // Do nothing if max exceeded (with infinite max, this check passes for positive numbers)
+                } else {
+                     i.quantity = newQty;
+                }
+                updateCartUI(); 
+            }
+        };
+        
+        function updateCartUI() {
+            const container = document.getElementById('cartItemsContainer');
+            container.innerHTML = '';
+            let subtotal = 0;
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#777; margin-top:50px;"><i class="fas fa-shopping-basket" style="font-size:2em; margin-bottom:10px;"></i><br>Your cart is empty.</p>';
+            } else {
+                cart.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    subtotal += itemTotal;
+                    const dishImage = item.img || 'https://via.placeholder.com/150';
+                    container.innerHTML += `
+                        <div class="cart-item">
+                            <img src="${dishImage}" alt="${item.name}">
+                            <div style="flex:1;">
+                                <h4 style="margin:0; font-size:1em;">${item.name}</h4>
+                                <p style="margin:2px 0 0 0; color:var(--primary-color); font-weight:600;">₹${item.price.toFixed(2)} x ${item.quantity} = ₹${itemTotal.toFixed(2)}</p>
+                            </div>
+                            <div class="qty-controls">
+                                <button onclick="modQty('${item.id}',-1)"><i class="fas fa-minus"></i></button>
+                                <span>${item.quantity}</span>
+                                <button onclick="modQty('${item.id}',1)"><i class="fas fa-plus"></i></button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            const deliveryFee = 10.00;
+            const total = subtotal + deliveryFee;
+            document.getElementById('subtotal-price').textContent = `₹${subtotal.toFixed(2)}`;
+            document.getElementById('total-price').textContent = `₹${total.toFixed(2)}`;
+            document.getElementById('cart-count').textContent = cart.reduce((a, b) => a + b.quantity, 0);
+
+            checkOrderValidity(); 
+        }
+
+         // --- PDP LOGIC (NEW) ---
+        window.showProductDetail = (dishKey) => {
+            if (!currentUser) {
+                 showPage('loginPage');
+                 return;
+            }
+
+            currentPdpDish = allDishesData.find(d => d.key === dishKey);
+            if (!currentPdpDish) return;
+            
+            // Calculate discounted price
+            const discount = currentPdpDish.discount || 0;
+            // FIX: Use final price (before discount) for originalPrice
+            const originalPrice = parseFloat(currentPdpDish.price.final || 0); 
+            // FIX: Use customerPrice (after discount) for discountedPrice
+            const discountedPrice = parseFloat(currentPdpDish.customerPrice || 0); 
+            
+            document.getElementById('pdpHeaderTitle').textContent = currentPdpDish.name;
+            document.getElementById('pdpName').textContent = currentPdpDish.name;
+            document.getElementById('pdpUnit').textContent = `Unit: ${currentPdpDish.unit || 'Unit N/A'}`;
+            document.getElementById('pdpDescription').innerHTML = currentPdpDish.description || 'No description available for this product.';
+            
+            document.getElementById('pdpPrice').textContent = `₹${discountedPrice.toFixed(2)}`;
+            
+            // Show original price if discounted
+            if (discount > 0) {
+                 document.getElementById('pdpOriginalPrice').innerHTML = `<span class="original">₹${originalPrice.toFixed(2)}</span>`;
+                 document.getElementById('pdpDiscountTag').style.display = 'flex';
+                 document.getElementById('pdpDiscountTag').textContent = `-${discount}%`;
+            } else {
+                 document.getElementById('pdpOriginalPrice').innerHTML = '';
+                 document.getElementById('pdpDiscountTag').style.display = 'none';
+            }
+            
+            // Wishlist button state (Relies on listener in the background to update `wishlist` array)
+            updatePdpWishlistButton(dishKey);
+            
+            // Quantity Controls setup
+            pdpQuantity = 1; // MODIFIED: Reset quantity to minimum of 1
+            document.getElementById('pdpQuantity').textContent = pdpQuantity;
+            
+            // MODIFIED: Set initial text for button (removed max quantity text)
+            document.getElementById('pdpAddToCartBtn').textContent = `Add to Cart`;
+            // DELETED: Removed this warning text as requested
+            // document.getElementById('pdpMinQtyWarning').textContent = `प्रति वस्तु अधिकतम खरीद मात्रा: ${MAX_ITEM_QTY}`; 
+
+            // Image Slider setup
+            const images = currentPdpDish.images || [currentPdpDish.imageUrl || 'https://via.placeholder.com/150'];
+            const slider = document.getElementById('pdpSlider');
+            const dotsContainer = document.getElementById('pdpDots');
+            slider.innerHTML = images.map(img => `<div class="pdp-slide"><img src="${img}" alt="${currentPdpDish.name}"></div>`).join('');
+            dotsContainer.innerHTML = images.map((_, index) => 
+                `<div class="pdp-dot ${index === 0 ? 'active' : ''}" onclick="goToPdpSlide(${index})"></div>`
+            ).join('');
+            slider.style.transform = 'translateX(0%)'; // Reset slide position
+            pdpCurrentSlide = 0;
+            
+            // NEW: Start auto-scroll if there's more than one image
+            clearInterval(pdpAutoScrollInterval);
+            if (images.length > 1) {
+                 pdpAutoScrollInterval = setInterval(pdpNextSlide, 2000); // 2 sec auto-scroll
+            }
+            
+            showPage('productDetailPage');
+        };
+
+        function updatePdpWishlistButton(dishKey) {
+            const wishlistBtn = document.getElementById('pdpWishlistBtn');
+            const isWished = wishlist.includes(dishKey);
+            const heartColor = isWished ? 'var(--danger)' : '#ccc';
+            wishlistBtn.className = `btn-main wishlist-btn ${isWished ? 'active' : ''}`;
+            wishlistBtn.innerHTML = `<i class="fas fa-heart" style="color:${heartColor};"></i> ${isWished ? 'Remove from Wishlist' : 'Add to Wishlist'}`;
+            wishlistBtn.onclick = () => toggleWishlist(dishKey);
+        }
+
+        // Helper to update PDP wishlist button if it's currently visible
+        function updatePdpWishlistButtonIfOpen() {
+             if (document.getElementById('productDetailPage').classList.contains('active') && currentPdpDish) {
+                 updatePdpWishlistButton(currentPdpDish.key);
+            }
+        }
+
+        // PDP Slider JS
+        let pdpCurrentSlide = 0;
+        window.goToPdpSlide = (index) => {
+            const slider = document.getElementById('pdpSlider');
+            const dots = document.querySelectorAll('#pdpDots .pdp-dot');
+            const totalSlides = dots.length;
+            if (index >= 0 && index < totalSlides) {
+                slider.style.transform = `translateX(-${index * 100}%)`;
+                dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+                pdpCurrentSlide = index;
+            }
+        };
+        
+        // NEW: PDP Next Slide for Auto-Scroll
+        window.pdpNextSlide = () => {
+             const dots = document.querySelectorAll('#pdpDots .pdp-dot');
+             if (dots.length <= 1) return;
+             let nextIndex = pdpCurrentSlide + 1;
+             if (nextIndex >= dots.length) nextIndex = 0;
+             window.goToPdpSlide(nextIndex);
+        };
+        
+        // PDP Quantity Controls
+        document.getElementById('pdpQtyMinus').onclick = () => {
+             if (pdpQuantity > 1) { // MODIFIED: Minimum quantity is 1
+                 pdpQuantity--;
+                 document.getElementById('pdpQuantity').textContent = pdpQuantity;
+             }
+        };
+        document.getElementById('pdpQtyPlus').onclick = () => {
+             // DELETED: Removed max quantity check as requested
+             pdpQuantity++;
+             document.getElementById('pdpQuantity').textContent = pdpQuantity;
+        };
+
+        // PDP Add to Cart Button (Adds pdpQuantity items at once)
+        document.getElementById('pdpAddToCartBtn').onclick = () => {
+             if (!currentUser) {
+                 showPage('loginPage');
+                 return;
+             }
+             if (currentPdpDish) {
+                 // DELETED: Removed max quantity check as requested
+                 window.addToCart(currentPdpDish.key, pdpQuantity);
+                 alert(`${pdpQuantity} x ${currentPdpDish.name} added to cart!`);
+                 showPage('cartPage');
+             }
+        };
+        // --- END PDP LOGIC ---
+
+
+        // --- PROFILE PAGE & ORDERS (v9 Syntax) ---
+
+        function loadProfilePage() {
+            if(currentUser && userData) {
+                // FIX: Use full userData object
+                document.getElementById('profileUserName').textContent = userData.name || currentUser.email.split('@')[0];
+                document.getElementById('profileUserEmail').textContent = userData.email || 'N/A';
+                
+                const mobile = userData.mobile || 'N/A';
+                
+                const addressLine = userData.address?.line || 'N/A';
+                const district = userData.address?.district || 'N/A';
+                const state = userData.address?.state || 'N/A';
+                const pincode = userData.pincode || 'N/A';
+
+                const fullAddressDisplay = `${addressLine}, ${district}, ${state} - ${pincode}`;
+                
+                document.getElementById('profileUserMobileDisplay').textContent = `Mobile: ${mobile}`;
+                document.getElementById('profileUserAddressDisplay').textContent = `Address: ${fullAddressDisplay}`;
+
+            } else {
+                 // Should be unreachable due to auth gate, but as fallback for display
+                 document.getElementById('profileUserName').textContent = 'Guest User';
+                 document.getElementById('profileUserEmail').textContent = 'Please log in';
+                 document.getElementById('profileUserMobileDisplay').textContent = `Mobile: N/A`;
+                 document.getElementById('profileUserAddressDisplay').textContent = `Address: N/A`;
+            }
+        }
+        
+        // NEW FUNCTION: Confirm and Cancel Active Order (Only if PLACED, PREPARING, PROCESSING, or DELIVERY_FAILED)
+        window.confirmCancelOrder = (orderKey) => {
+            if (confirm("Kya aap sach mein yeh order cancel karna chahte hain? Ek baar cancel hone ke baad wapas nahi ho payega.")) {
+                cancelOrder(orderKey);
+            }
+        };
+
+        window.cancelOrder = async (orderKey) => {
+            if (!currentUser) return;
+            const btn = document.querySelector(`#order-${orderKey} .cancel-order-btn`);
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'Cancelling...';
+            }
+            
+            try {
+                // Set the status to CANCELLED in the database
+                await update(ref(db, `orders/${orderKey}`), { status: 'CANCELLED', cancellationReason: 'Cancelled by customer via app.' });
+            } catch (e) {
+                alert("Order cancel karne mein fail ho gaye. Kripya dobara try karein.");
+                console.error("Cancellation Failed:", e);
+                if (btn) {
+                     btn.disabled = false;
+                     btn.textContent = 'Order Cancel Karein';
+                }
+            }
+        };
+
+        // NEW FUNCTION: Confirm and Delete Order from History (Only if DONE or CANCELLED)
+        window.confirmDeleteOrder = (orderKey) => {
+            if (confirm("Kya aap sach mein yeh order history se hatana chahte hain?")) {
+                deleteOrder(orderKey);
+            }
+        };
+
+        window.deleteOrder = async (orderKey) => {
+            if (!currentUser) return;
+            try {
+                // Use remove to delete the order from the database
+                await remove(ref(db, `orders/${orderKey}`));
+                // The onValue listener in loadOrders() will automatically update the UI
+            } catch (e) {
+                alert("Order history se hatane mein fail ho gaye. Kripya dobara try karein.");
+                console.error("Deletion Failed:", e);
+            }
+        };
+        // END NEW FUNCTIONS FOR CANCELLATION/DELETION LOGIC
+
+
+        // Helper function to render/update a single order card HTML
+        function updateOrderCardHTML(o) {
+             const st = o.customerStatus;
+             let s1 = '', s2 = '', s3 = '', s4 = '';
+             
+             // Apply tracking bar logic
+             if (st.startsWith('Cancelled')) {
+                 s1 = 'passed'; s2 = 'passed'; s3 = 'passed'; // Simulating progress before cancellation
+             } else if (st === 'Placed') s1 = 'active'; // Only Placed is active initially
+             else if (st === 'Preparing' || st === 'Processing') { s1 = 'passed'; s2 = 'active'; } // 'Processing' also falls under 'Preparing'
+             else if (st === 'On Way' || st === 'Delivery Failed') { s1 = 'passed'; s2 = 'passed'; s3 = 'active'; } // On Way or Delivery Failed
+             else if (st === 'Done') { s1 = 'passed'; s2 = 'passed'; s3 = 'passed'; s4 = 'active'; }
+
+             // FIX 3: Robustly handle order items (Firebase Realtime DB array issue fix)
+             const orderItems = Array.isArray(o.items) 
+                 ? o.items 
+                 : (o.items ? Object.values(o.items) : []);
+             
+             let itemsHtml = orderItems.map(item => {
+                 // FIX: Ensure price is parsed as float for calculations
+                 const itemPrice = parseFloat(item.price || 0).toFixed(2);
+                 const itemTotal = (parseFloat(item.price || 0) * parseFloat(item.quantity || 0)).toFixed(2);
+                 const itemImage = item.img || 'https://via.placeholder.com/150';
+                 const isRemoved = item.status === 'CANCELLED_OUT_OF_STOCK'; // Item removed by DP/Admin
+                 const itemStatusStyle = isRemoved ? 'opacity: 0.5; text-decoration: line-through;' : '';
+                 const itemStatusText = isRemoved ? `<span style="color:var(--danger); font-size:0.8em; font-weight:600;">(Out of Stock)</span>` : '';
+
+                 return `
+                     <div style="display:flex; align-items:center; margin-bottom:10px; border-bottom:1px solid #f1f2f6; padding-bottom:10px; ${itemStatusStyle}">
+                         <img src="${itemImage}" alt="${item.name}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; margin-right:10px;">
+                         <div style="flex:1;">
+                             <h5 style="margin:0; font-size:0.9em;">${item.name} ${itemStatusText}</h5>
+                             <p style="margin:0; font-size:0.8em; color:#636e72;">Qty: ${item.quantity} | ₹${itemPrice}/each</p>
+                         </div>
+                         <span style="font-weight:700; color:var(--text-color); flex-shrink:0;">₹${itemTotal}</span>
+                     </div>
+                 `;
+             }).join('');
+             
+             let actionButtonsHtml = '';
+             let driverInfoHtml = '';
+             // Status color logic: Danger for Cancelled/Failed, Success for Done, Primary for active
+             let statusColor = (st.startsWith('Cancelled') || st === 'Delivery Failed' || st === 'Processing') ? 'var(--danger)' : (st === 'Done' ? 'var(--success)' : 'var(--primary-color)');
+
+             // --- CANCELLATION/DELETION LOGIC IMPLEMENTATION ---
+             if (st === 'Placed' || st === 'Preparing' || st === 'Processing' || st === 'Delivery Failed') { 
+                  // Allow cancellation for active orders, including those in generic 'Processing' or 'Delivery Failed' states.
+                  actionButtonsHtml = `
+                      <div class="order-action-buttons">
+                          <button class="btn-main cancel-order-btn" onclick="confirmCancelOrder('${o.k}')" style="background:var(--danger); width:100%; margin-top:0; box-shadow:none;">
+                              <i class="fas fa-times-circle"></i> Order Cancel Karein
+                          </button>
+                      </div>
+                  `;
+             } else if (st === 'Done' || st.startsWith('Cancelled')) {
+                  // Option to delete from history for completed/cancelled orders
+                  actionButtonsHtml = `
+                      <div class="order-action-buttons">
+                          <button class="btn-main delete-order-btn" onclick="confirmDeleteOrder('${o.k}')" style="background:#6c757d; width:100%; margin-top:0; box-shadow:none; font-size:0.9em; padding:10px;">
+                              <i class="fas fa-trash-alt"></i> History Se Hatayein 
+                          </button>
+                      </div>
+                  `;
+             // FIX 2: DP Info Card with Call Button
+             } else if (st === 'On Way' && o.driverDetails) {
+                  // Show DP info and Call button for 'On Way'
+                  driverInfoHtml = `
+                     <div class="dp-info-card">
+                         <img src="${o.driverDetails.imageUrl}" alt="${o.driverDetails.name}">
+                         <div>
+                             <h4>Delivery Partner: ${o.driverDetails.name}</h4>
+                             <p>Mobile: ${o.driverDetails.mobile}</p>
+                             <p style="font-weight:700; color:var(--danger); font-size:0.8em;">**Aapka order nikal chuka hai!**</p>
+                         </div>
+                     </div>
+                  `;
+                  actionButtonsHtml = `
+                      <div class="order-action-buttons">
+                          <button onclick="window.open('tel:${o.driverDetails.mobile}', '_system')" style="width:100%;"><i class="fas fa-phone"></i> Call Delivery Boy</button>
+                      </div>
+                  `;
+             } 
+             // No action buttons for 'Preparing'
+             // --- END CANCELLATION/DELETION LOGIC ---
+
+
+             // Conditionally show the tracking bar
+             let trackingBarHtml = `
+                 <div class="track-bar">
+                     <div class="track-step ${s1}"><div class="dot"></div><p>Placed</p></div>
+                     <div class="track-step ${s2}"><div class="dot"></div><p>Prep</p></div>
+                     <div class="track-step ${s3}"><div class="dot"></div><p>On Way</p></div>
+                     <div class="track-step ${s4}"><div class="dot"></div><p>Done</p></div>
+                 </div>
+             `;
+             
+             // Custom tracking bar for Cancelled/Done to show finality
+             if (st === 'Done' || st.startsWith('Cancelled') || st === 'Delivery Failed') {
+                  const finalDotBg = (st.startsWith('Cancelled') || st === 'Delivery Failed') ? 'var(--danger)' : 'var(--primary-color)';
+                  const finalTextColor = (st.startsWith('Cancelled') || st === 'Delivery Failed') ? 'var(--danger)' : 'var(--primary-color)';
+                  const finalStatusText = st.startsWith('Cancelled') ? 'Cancelled' : (st === 'Delivery Failed' ? 'Failed' : 'Done');
+                  trackingBarHtml = `
+                     <div class="track-bar">
+                         <div class="track-step passed"><div class="dot"></div><p>Placed</p></div>
+                         <div class="track-step passed"><div class="dot"></div><p>Prep</p></div>
+                         <div class="track-step passed"><div class="dot"></div><p>On Way</p></div>
+                         <div class="track-step passed" style="width:25%;"><div class="dot" style="background: ${finalDotBg};"></div><p style="color:${finalTextColor};">${finalStatusText}</p></div>
+                     </div>
+                  `;
+             }
+
+             return `
+                 <div class="order-card" id="order-${o.k}">
+                     <div style="display:flex;justify-content:space-between;font-weight:600; margin-bottom:10px;">
+                         <span>Order ID: #${o.k.substring(1, 6)}</span>
+                         <span style="color:${statusColor}">${st}</span>
+                     </div>
+                     
+                     ${driverInfoHtml} 
+
+                     <div style="margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 10px;">
+                         ${itemsHtml}
+                         <div style="display:flex; justify-content:space-between; font-weight:700; margin-top:10px; padding-top:10px; border-top:1px dashed #dfe6e9;">
+                             <span>Payment Method:</span>
+                             <span style="color:var(--success);">${o.method}</span>
+                         </div>
+                         <div style="display:flex; justify-content:space-between; font-weight:700; font-size:1.1em; color:var(--primary-color); margin-top:5px;">
+                             <span>Total Amount:</span>
+                             <span>₹${o.total}</span>
+                         </div>
+                     </div>
+
+                     <p style="font-size:0.9em; color:#636e72; margin-top: 10px; margin-bottom: 20px;">
+                         **Delivering to:** ${o.address} 
+                     </p>
+                     
+                     ${o.cancellationReason && o.status.startsWith('CANCELLED') ? `<p style="color:var(--danger); font-size:0.9em; font-weight:600; margin-top:-10px;">Cancellation Reason: ${o.cancellationReason}</p>` : ''}
+                     ${o.status === 'DELIVERY_FAILED' ? `<p style="color:var(--danger); font-size:0.9em; font-weight:600; margin-top:-10px;">Delivery Status: Delivery Failed. Please contact support or re-order.</p>` : ''}
+
+
+                     ${trackingBarHtml}
+                     
+                     ${actionButtonsHtml}
+                 </div>
+             `;
+        }
+
+
+        async function loadOrders() {
+            const container = document.getElementById('ordersListContainer');
+            if (!currentUser) { 
+                container.innerHTML = '<p style="text-align:center; color:#777; padding:20px;">Please log in to see your orders.</p>'; 
+                return; 
+            }
+
+            container.innerHTML = '<p style="text-align:center; padding:20px;">Loading...</p>';
+            const ordersRef = ref(db, 'orders');
+            
+            if (ordersListener) ordersListener(); // Detach old listener
+
+            // v9: Use onValue for live updates
+            ordersListener = onValue(ordersRef, async (snapshot) => {
+                
+                const orders = [];
+                let orderFound = false; 
+
+                // FIX 2: Collect all orders first and all DP data if needed
+                const dpPromises = [];
+                const dpCache = {};
+                
+                snapshot.forEach(childSnap => {
+                    const val = childSnap.val();
+                    if (val.userId === currentUser.uid) { 
+                        orderFound = true;
+                        
+                        const customerStatusMap = {
+                            'PLACED': 'Placed',
+                            'ACCEPTED': 'Preparing',
+                            'PREPARING': 'Preparing',
+                            'READY_FOR_PICKUP': 'Preparing',
+                            'PROCESSING': 'Processing', // NEW: Added based on image hint
+                            'PICKED_UP': 'On Way',
+                            'OUT_FOR_DELIVERY': 'On Way',
+                            'DELIVERED': 'Done',
+                            'CANCELLED': 'Cancelled', // User cancelled
+                            'CANCELLED_BY_DP': 'Cancelled (DP)',
+                            'CANCELLED_NO_ITEMS': 'Cancelled (No Items)',
+                            'CANCELLED_BY_ADMIN': 'Cancelled (Admin)', // Added Admin Cancel Status
+                            'DELIVERY_FAILED': 'Delivery Failed' // NEW: From DP marking delivery failure
+                        };
+
+                        val.customerStatus = customerStatusMap[val.status] || 'Processing'; // Fallback to 'Processing'
+                        val.k = childSnap.key;
+
+                        // Identify orders that need DP details for 'On Way' status
+                        if (val.customerStatus === 'On Way' && val.dboyId) {
+                            if (!dpCache[val.dboyId]) {
+                                // Add promise to fetch DP data if not already cached/fetching
+                                dpPromises.push(
+                                    get(ref(db, `delivery_partners/${val.dboyId}`))
+                                    .then(dpSnap => {
+                                        const dpData = dpSnap.val();
+                                        dpCache[val.dboyId] = dpData ? {
+                                            name: dpData.name,
+                                            mobile: dpData.mobile,
+                                            imageUrl: dpData.profileImageUrl || 'https://cdn-icons-png.flaticon.com/512/4140/4140037.png'
+                                        } : simulatedDriver;
+                                    })
+                                    .catch(e => {
+                                        console.error("Error fetching DP data:", e);
+                                        dpCache[val.dboyId] = simulatedDriver; // Fallback
+                                    })
+                                );
+                            }
+                        }
+                        orders.push(val); 
+                    }
+                });
+                
+                // Wait for all DP data fetches to complete
+                if (dpPromises.length > 0) {
+                   await Promise.all(dpPromises);
+                }
+                
+                // Now, assign DP details and render
+                orders.forEach(order => {
+                    if (order.customerStatus === 'On Way' && order.dboyId) {
+                        order.driverDetails = dpCache[order.dboyId];
+                    } else {
+                        order.driverDetails = null;
+                    }
+                });
+
+                if (!orderFound) { 
+                    container.innerHTML = '<p style="text-align:center; color:#777; padding:20px;">Abhi koi order nahi hai. Naya order place karein!</p>'; 
+                    return; 
+                }
+
+                orders.sort((a, b) => b.timestamp - a.timestamp); // Sort by newest first
+                
+                container.innerHTML = orders.map(updateOrderCardHTML).join('');
+                
+                // Re-attach data-page handlers for navigation
+                 document.querySelectorAll('[data-page]').forEach(b => 
+                    b.addEventListener('click', (e) => {
+                         const target = e.currentTarget.dataset.target || e.currentTarget.dataset.page;
+                         if(target) showPage(target); 
+                    })
+                );
+            });
+        }
+        
+        function initHomeUI(isGuest = false) {
+            
+            // Only convert placeholders once
+            if (placeholderDishes.some(d => !d.customerPrice)) {
+                placeholderDishes.forEach(d => {
+                    // Ensure price structure is consistent
+                    const priceObj = d.price && typeof d.price === 'object' 
+                        ? d.price 
+                        : { final: parseFloat(d.price || 0), restaurantPrice: parseFloat(d.price || 0), adminFee: 0 };
+                        
+                    const finalPriceBeforeDiscount = parseFloat(priceObj.final || 0);
+                    d.price = priceObj; // Keep the full object
+                    d.customerPrice = finalPriceBeforeDiscount * (1 - (d.discount || 0) / 100); 
+                });
+            }
+            
+            renderCategories(placeholderCategories);
+            renderSlider(placeholderSliderImages);
+            
+            const initialDishes = placeholderDishes.filter(d => d.pincode === 'ALL');
+                
+            allDishesData = initialDishes; // Update allDishesData for correct rendering on guest load
+            renderDishes(initialDishes); 
+            
+             // Set the initial active page (Home) only if no other page is active (i.e., on first load)
+            // if (!document.querySelector('.page.active')) {
+            //     document.getElementById('appContainer').classList.add('active');
+            // }
+        }
+
+        // --- SLIDER LOGIC ---
+        let currentSlide = 0;
+        let slideInterval;
+        const initSlider = () => {
+            const slides = document.querySelectorAll('#home-slider .slide');
+            if (slides.length <= 1) return;
+            const slider = document.getElementById('home-slider');
+            const nextBtn = document.querySelector('.next-slide');
+            const prevBtn = document.querySelector('.prev-slide');
+            
+            clearInterval(slideInterval); // Clear any existing interval
+
+            const goToSlide = (slideIndex) => {
+                slider.style.transform = `translateX(-${slideIndex * 100}%)`;
+                currentSlide = slideIndex;
+            };
+            
+            const next = () => {
+                let nextIndex = currentSlide + 1;
+                if (nextIndex >= slides.length) nextIndex = 0;
+                goToSlide(nextIndex);
+            };
+
+            const prev = () => {
+                let prevIndex = currentSlide - 1;
+                if (prevIndex < 0) prevIndex = slides.length - 1;
+                goToSlide(prevIndex);
+            };
+            
+            const resetInterval = () => {
+                clearInterval(slideInterval);
+                slideInterval = setInterval(next, 5000);
+            };
+            
+            nextBtn.onclick = () => {
+                next();
+                resetInterval();
+            };
+            prevBtn.onclick = () => {
+                prev();
+                resetInterval();
+            };
+
+            resetInterval();
+        };
+
+        // Initialize the UI on script load (sets initial state for guest/no-auth)
+        // initHomeUI(true); // Moved call to inside splash logic
+        updateCartUI(); 
+    </script>
+</body>
+</html>
